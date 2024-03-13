@@ -1,0 +1,146 @@
+﻿@page "/Services/{ServiceId:int}"
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.EntityFrameworkCore
+@using RevisioHub.Web.Components.Account.Shared
+@using RevisioHub.Web.Model.Db.Services
+@inject Context Context;
+
+<div class="container border m-0 p-3 rounded rounded-3">
+    <h4>Hosts</h4>
+    <ul class="list-group-horizontal d-flex flex-wrap">
+    @foreach(var serviceHost in Service.ServiceHosts)
+    {
+        <li class="list-group-item border-0 p-1">
+            <a href="/ServiceHost/@serviceHost.Id" class="btn btn-primary">@serviceHost.Host.Name</a>
+        </li>
+    }
+    </ul>
+    <h3>Add Host to service</h3>
+    <EditForm Model="ServiceHost" method="post" OnValidSubmit="AddServiceHost" FormName="ServiceHost">
+        <div class="form-floating mb-3">
+            <InputSelect class="form-control" @bind-Value="ServiceHost.HostId">
+                @foreach (var host in Context.Hosts)
+                {
+                    <option value="@host.Id">@host.Name</option>
+                }
+            </InputSelect>
+            <label>Host</label>
+        </div>
+        <div class="form-floating mb-3">
+            <InputText class="form-control" @bind-Value=ServiceHost.WorkDirectory/>
+            <label>Working Directory</label>
+        </div>
+        <button type="submit" class="w-100 btn btn-lg btn-primary">Add Host to this service</button>
+    </EditForm>
+</div>
+
+
+<div class="container border m-0 p-3 rounded rounded-3 mt-5">
+    <h4>Scripts</h4>
+    <ul class="list-group">
+    @foreach(var hostScript in Service.ServiceScripts.GroupBy(s => s.HostType).ToDictionary(s => s.First().HostType))
+    {
+        <li class="list-group-item">
+            <span>@hostScript.Key</span>
+            <ul class="list-group-horizontal d-flex flex-wrap">
+            @foreach(var script in hostScript.Value)
+            {
+                <li class="list-group-item border-0 p-1"><a href="/scripts/@script.Id" class="btn btn-primary">@script.ScriptType</a></li>
+            }
+            </ul>
+        </li>
+    }
+    </ul>
+
+    <h3>Add Service Script</h3>
+    <EditForm Model="Script" method="post" OnValidSubmit="AddScript" FormName="AddScript">
+        <div class="form-floating mb-3">
+            <InputSelect class="form-control" @bind-Value="Script.ScriptType" TValue="ScriptType">
+                @foreach (var scriptType in Enum.GetValues<ScriptType>())
+                {
+                    <option value="@scriptType.ToString()">@scriptType.ToString()</option>
+                }
+            </InputSelect>
+            <label>Script Type</label>
+        </div>
+        <div class="form-floating mb-3">
+            <InputSelect class="form-control" @bind-Value=Script.HostType TValue="HostType">
+                @foreach (var hostType in Enum.GetValues<HostType>())
+                {
+                    <option value="@hostType.ToString()">@hostType.ToString()</option>
+                }
+            </InputSelect>
+            <label>Host Type</label>
+        </div>
+        <InputTextArea class="form-control script" style="height: 300px" @bind-Value="Script.Script">
+
+        </InputTextArea>
+        <button type="submit" class="w-100 btn btn-lg btn-primary">Add Script</button>
+    </EditForm>
+
+</div>
+
+
+
+@code {
+    [Parameter]
+    public int ServiceId { get; set; } = 0;
+
+    public Service Service => Context.Services.Include(s => s.ServiceHosts).ThenInclude(sh => sh.Host).Include(s => s.ServiceScripts).First(s => s.Id == ServiceId);
+
+    [SupplyParameterFromForm(FormName = "AddScript")]
+    private ScriptModel Script { get; set; } = new();
+    [SupplyParameterFromForm(FormName = "ServiceHost")]
+    private ServiceHostModel ServiceHost { get; set; } = new();
+
+    public async Task AddScript(EditContext editContext)
+    {
+        ServiceScript serviceScript = new()
+        {
+            HostType = Script.HostType,
+            ScriptType = Script.ScriptType,
+            Script = Script.Script,
+            ServiceId = ServiceId
+        };
+
+        Context.ServiceScripts.Add(serviceScript);
+        await Context.SaveChangesAsync();
+        Script = new();
+    }
+
+
+    public async Task AddServiceHost(EditContext editContext)
+    {
+        ServiceHost serviceHost = new()
+        {
+            HostId = ServiceHost.HostId,
+            ServiceId = ServiceId,
+            WorkingDirectory = ServiceHost.WorkDirectory,
+        };
+        Context.ServiceHosts.Add(serviceHost);
+        await Context.SaveChangesAsync();
+        ServiceHost = new();
+    }
+
+    private sealed class ScriptModel
+    {
+        [Required]
+        [Display(Name = "Script Type")]
+        public ScriptType ScriptType { get; set; } = ScriptType.Unknown;
+
+        [Required]
+        [Display(Name = "HostType")]
+        public HostType HostType { get; set; } = HostType.Generic;
+
+        [Display(Name = "Script")]
+        public string Script { get; set; } = "";
+    }
+
+    private sealed class ServiceHostModel
+    {
+        [Required]
+        public int HostId { get; set; } = 0;
+        public string WorkDirectory { get; set; } = string.Empty;
+    }
+
+}

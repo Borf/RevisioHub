@@ -1,0 +1,47 @@
+﻿@page "/Hosts/Add"
+@using System.ComponentModel.DataAnnotations
+@using RevisioHub.Web.Components.Account.Shared
+@using RevisioHub.Web.Model.Db.Services
+@inject Context Context;
+@inject NavigationManager NavigationManager
+
+<StatusMessage Message="@Message" />
+<EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="AddHost" FormName="register">
+    <DataAnnotationsValidator />
+    <h3>Add new Host</h3>
+    <hr />
+    <ValidationSummary class="text-danger" role="alert" />
+    <div class="form-floating mb-3">
+        <InputText @bind-Value="Input.Name" class="form-control" aria-required="true" placeholder="" />
+        <label for="name">Name</label>
+        <ValidationMessage For="() => Input.Name" class="text-danger" />
+    </div>
+    <button type="submit" class="w-100 btn btn-lg btn-primary">Add</button>
+</EditForm>
+
+@code {
+    private string? Message => null;
+    [SupplyParameterFromForm]
+    private InputModel Input { get; set; } = new();
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; set; }
+
+
+    public async Task AddHost(EditContext editContext)
+    {
+        var newHost = new Host
+            {
+                Name = Input.Name
+            };
+        Context.Hosts.Add(newHost);
+        await Context.SaveChangesAsync();
+        NavigationManager.NavigateTo($"/Hosts/{newHost.Id}");
+    }
+
+    private sealed class InputModel
+    {
+        [Required]
+        [Display(Name = "Name")]
+        public string Name { get; set; } = "";
+    }
+}

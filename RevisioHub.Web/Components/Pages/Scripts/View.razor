@@ -1,0 +1,63 @@
+﻿@page "/Scripts/{ScriptId:int}"
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.EntityFrameworkCore
+@using RevisioHub.Web.Components.Account.Shared
+@using RevisioHub.Web.Model.Db.Services
+@inject Context Context;
+@inject NavigationManager NavigationManager;
+
+
+<hr />
+<EditForm Model="Script" method="post" OnValidSubmit="UpdateScript" FormName="UpdateScript" @ref=Form>
+    <div class="form-floating mb-3">
+        <InputSelect class="form-control" @bind-Value="Script.ScriptType" TValue="ScriptType">
+            @foreach (var scriptType in Enum.GetValues<ScriptType>())
+            {
+                <option value="@scriptType.ToString()">@scriptType.ToString()</option>
+            }
+        </InputSelect>
+        <label>Script Type</label>
+    </div>
+    <div class="form-floating mb-3">
+        <InputSelect class="form-control" @bind-Value=Script.HostType TValue="HostType">
+            @foreach (var hostType in Enum.GetValues<HostType>())
+            {
+                <option value="@hostType.ToString()">@hostType.ToString()</option>
+            }
+        </InputSelect>
+        <label>Host Type</label>
+    </div>
+    <InputTextArea class="form-control script" style="height: 300px" @bind-Value="Script.Script">
+
+    </InputTextArea>
+    <button type="submit" class="btn w-100 btn-lg btn-primary">Save</button>
+</EditForm>
+
+
+
+
+
+@code {
+    [Parameter]
+    public int ScriptId { get; set; } = 0;
+
+    public ServiceScript Script { get; set; } = null!;
+    public bool Apply { get; set; }
+    public EditForm Form { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Script = Context.ServiceScripts.Find(ScriptId)!;
+    }
+
+
+    public async Task UpdateScript(EditContext editContext)
+    {
+        Context.ServiceScripts.Update(Script);
+        await Context.SaveChangesAsync();
+
+        if(!Apply)
+            NavigationManager.NavigateTo($"/Services/{Script.ServiceId}");
+    }
+    
+}

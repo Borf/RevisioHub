@@ -1,0 +1,28 @@
+﻿@page "/Hosts/{HostId:int}"
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.EntityFrameworkCore
+@using RevisioHub.Web.Components.Account.Shared
+@using RevisioHub.Web.Model.Db.Services
+@inject Context Context;
+
+
+<h4>Services on host</h4>
+<ul class="d-flex d-inline-flex">
+@foreach(var serviceHost in Host.ServiceHosts)
+{
+    <li>
+        @serviceHost.Service.Name
+    </li>
+}
+</ul>
+
+
+
+@code {
+    [Parameter]
+    public int HostId { get; set; } = 0;
+
+    public Host Host => Context.Hosts.Include(h => h.ServiceHosts).ThenInclude(sh => sh.Service).First(s => s.Id == HostId);
+
+    
+}
