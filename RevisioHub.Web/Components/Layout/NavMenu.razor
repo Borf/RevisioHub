@@ -1,4 +1,5 @@
 ﻿@using RevisioHub.Web.Model.Db.Services
+@using RevisioHub.Web.Services
 @implements IDisposable
 
 @inject NavigationManager NavigationManager
@@ -40,9 +41,10 @@
                     @foreach (var host in Context.Hosts)
                     {
                         var href = $"Hosts/{host.Id}";
+                        bool connected = ClientService.Users.Contains(host.Name);
                         <div class="nav-item px-3">
                             <NavLink class="nav-link" href="@href">
-                                <span class="bi bi-gear p-2" aria-hidden="true"></span> @host.Name
+                                <span class="bi bi-gear p-2 @(connected ? "text-success" : "text-danger")" aria-hidden="true"></span> @host.Name
                             </NavLink>
                         </div>
                     }
@@ -94,6 +96,7 @@
     {
         currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
         NavigationManager.LocationChanged += OnLocationChanged;
+        ClientService.Users.CollectionChanged += OnClientsChanged;
     }
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
@@ -105,6 +108,14 @@
     public void Dispose()
     {
         NavigationManager.LocationChanged -= OnLocationChanged;
+        ClientService.Users.CollectionChanged -= OnClientsChanged;
     }
+
+    private async void OnClientsChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    {
+        Console.WriteLine("suiohfgiuhgiuhdsf");
+        await InvokeAsync(StateHasChanged);
+    }
+
 }
 

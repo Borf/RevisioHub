@@ -5,5 +5,6 @@ public enum HostType
     Generic,
     Linux,
     DockerLinux,
-    WindowsService
+    WindowsService,
+    WindowsConsole,
 }

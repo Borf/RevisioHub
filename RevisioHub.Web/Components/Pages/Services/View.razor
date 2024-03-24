@@ -7,12 +7,10 @@
 
 <div class="container border m-0 p-3 rounded rounded-3">
     <h4>Hosts</h4>
-    <ul class="list-group-horizontal d-flex flex-wrap">
+    <ul class="list-group">
     @foreach(var serviceHost in Service.ServiceHosts)
     {
-        <li class="list-group-item border-0 p-1">
-            <a href="/ServiceHost/@serviceHost.Id" class="btn btn-primary">@serviceHost.Host.Name</a>
-        </li>
+        <ServiceHostLi ServiceHost="serviceHost"/>
     }
     </ul>
     <h3>Add Host to service</h3>

@@ -1,0 +1,32 @@
+﻿@using Microsoft.AspNetCore.SignalR
+@using RevisioHub.Web.Model.Db.Services
+@using RevisioHub.Web.Services
+@inject IHubContext<ClientService> ClientService;
+@inject Context Context;
+
+<li class="list-group-item">
+    <a class="btn btn-sm btn-primary">@ServiceHost.Service.Name</a> on <a class="btn btn-sm btn-primary">@ServiceHost.Host.Name</a>
+    <div class="btn-group" style="float: right;">
+        <a href="/ServiceHost/@ServiceHost.Id" class="btn btn-sm btn-secondary">Edit</a>
+        <button @onclick="Start" class="btn btn-sm btn-success">Start</button>
+        <button class="btn btn-sm btn-danger">Stop</button>
+        <button class="btn btn-sm btn-info">Update</button>
+    </div>
+</li>
+
+@code {
+    [Parameter]
+    public Model.Db.Services.ServiceHost ServiceHost { get; set; } = null!;
+
+
+    public void Start()
+    {
+
+        Console.WriteLine("Starting " + ServiceHost.Service.Name + " on " + ServiceHost.Host.Name);
+        var startScripts = Context.ServiceScripts.Where(script => script.ServiceId == ServiceHost.ServiceId && script.ScriptType == ScriptType.StartUp).ToList();
+        var startScript = startScripts.FirstOrDefault(s => s.HostType == ServiceHost.Host.HostType) ?? startScripts.First(s => s.HostType == HostType.Generic);
+        Console.WriteLine("Running " + startScript.Script + " in " + ServiceHost.WorkingDirectory);
+
+        ClientService.Clients.User(ServiceHost.Host.Name).SendAsync("RunScript", ServiceHost.WorkingDirectory, startScript.Script);
+    }
+}

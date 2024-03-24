@@ -1,28 +1,77 @@
 ﻿@page "/Hosts/{HostId:int}"
+@rendermode InteractiveServer
 @using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.SignalR
 @using Microsoft.EntityFrameworkCore
+@using Microsoft.IdentityModel.Tokens
 @using RevisioHub.Web.Components.Account.Shared
+@using RevisioHub.Web.Model
 @using RevisioHub.Web.Model.Db.Services
+@using System.Text
+@using System.IdentityModel.Tokens.Jwt
+@using System.Security.Claims
+@using RevisioHub.Web.Services
 @inject Context Context;
+@inject Configuration configuration;
+@inject IHubContext<ClientService> ClientService;
 
+<div class="container mb-5">
+    <h4>Services on @Host.Name</h4>
+    <ul class="list-group">
+    @foreach(var serviceHost in Host.ServiceHosts)
+    {
+        <ServiceHostLi ServiceHost="serviceHost" />
+    }
+    </ul>
+</div>
 
-<h4>Services on host</h4>
-<ul class="d-flex d-inline-flex">
-@foreach(var serviceHost in Host.ServiceHosts)
-{
-    <li>
-        @serviceHost.Service.Name
-    </li>
-}
-</ul>
+<div class="container mb-5">
+ <h4>Host Configuration</h4>
+<EditForm Model="Host" method="post" OnValidSubmit="UpdateHost" class="mb-5">
+    <div class="form-floating mb-3">
+        <InputText class="form-control" @bind-Value=Host.Name />
+        <label>Name</label>
+    </div>
 
+    <div class="form-floating mb-3">
+        <InputSelect class="form-control" @bind-Value=Host.HostType TValue="HostType">
+            @foreach (var hostType in Enum.GetValues<HostType>())
+            {
+                <option value="@hostType.ToString()">@hostType.ToString()</option>
+            }
+        </InputSelect>
+        <label>Host Type</label>
+    </div>
 
+    <button type="submit" class="btn w-100 btn-lg btn-primary">Save</button>
+</EditForm>
+</div>
+<div class="container">
+<h5>JWT Key</h5>
+    <textarea class="form-control" style="font-family: consolas; height; 250px;" readonly>
+    @{
+        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.JwtSecret));
+        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+        var token = new JwtSecurityToken(configuration.JwtIssuer, configuration.JwtAudience,new Claim[] 
+        {
+            new Claim(ClaimTypes.NameIdentifier, Host.Name),
+            new Claim("hostId", Host.Id+""),
+        }, expires: DateTime.Now.AddYears(1), signingCredentials: credentials);
+        var tokenStr = new JwtSecurityTokenHandler().WriteToken(token);
+    }
+    @tokenStr
+    </textarea>
+</div>
 
-@code {
-    [Parameter]
+    @code {
+        [Parameter]
     public int HostId { get; set; } = 0;
 
     public Host Host => Context.Hosts.Include(h => h.ServiceHosts).ThenInclude(sh => sh.Service).First(s => s.Id == HostId);
 
-    
+    public async void UpdateHost()
+    {
+        Context.Hosts.Update(Host);
+        await Context.SaveChangesAsync();
+    }
 }
