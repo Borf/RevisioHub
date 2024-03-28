@@ -1,32 +1,93 @@
-﻿@using Microsoft.AspNetCore.SignalR
+﻿@implements IDisposable
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.SignalR
+@using RevisioHub.Common.Models
 @using RevisioHub.Web.Model.Db.Services
 @using RevisioHub.Web.Services
+@using RevisioHub.Common.Models.db;
 @inject IHubContext<ClientService> ClientService;
 @inject Context Context;
+@inject ServiceStatusService ServiceStatusService;
 
+@{
+    var status = @ServiceStatusService.GetValueOrDefault(ServiceHost.Id, "-");
+    var bgColor = "bg-danger";
+    if (status == "Running")
+        bgColor = "bg-success";
+}
 <li class="list-group-item">
-    <a class="btn btn-sm btn-primary">@ServiceHost.Service.Name</a> on <a class="btn btn-sm btn-primary">@ServiceHost.Host.Name</a>
+    <div style="display: inline-block">
+        <a class="btn btn-sm btn-primary" style="width: 130px">@ServiceHost.Service.Name</a>
+        on 
+        <a class="btn btn-sm btn-primary" style="width: 100px">@ServiceHost.Host.Name</a>
+    </div>
+    <span class="badge @bgColor" style="margin-left: 10px;">@status</span>
     <div class="btn-group" style="float: right;">
         <a href="/ServiceHost/@ServiceHost.Id" class="btn btn-sm btn-secondary">Edit</a>
         <button @onclick="Start" class="btn btn-sm btn-success">Start</button>
-        <button class="btn btn-sm btn-danger">Stop</button>
+        <button @onclick="Stop" class="btn btn-sm btn-danger">Stop</button>
         <button class="btn btn-sm btn-info">Update</button>
     </div>
 </li>
 
+
 @code {
     [Parameter]
-    public Model.Db.Services.ServiceHost ServiceHost { get; set; } = null!;
+    public Common.Models.db.ServiceHost ServiceHost { get; set; } = null!;
+    [Parameter]
+    public int ServiceHostId { get; set; } = -1;
 
-
-    public void Start()
+    protected override void OnInitialized()
     {
+        if (ServiceHostId != -1)
+            ServiceHost = Context.ServiceHosts.First(host => host.Id == ServiceHostId); //eww, but [Parameter] doesn't like cyclic references
 
+        base.OnInitialized();
+        ServiceStatusService.CollectionChanged += OnServiceStatusChange;
+    }
+
+    public void Dispose()
+    {
+        ServiceStatusService.CollectionChanged -= OnServiceStatusChange;
+    }
+
+
+    private async void OnServiceStatusChange(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    {
+        //TODO: only update if ServiceHost.Id changed
+        await InvokeAsync(StateHasChanged);
+    }
+
+
+    public async void Start()
+    {
         Console.WriteLine("Starting " + ServiceHost.Service.Name + " on " + ServiceHost.Host.Name);
         var startScripts = Context.ServiceScripts.Where(script => script.ServiceId == ServiceHost.ServiceId && script.ScriptType == ScriptType.StartUp).ToList();
         var startScript = startScripts.FirstOrDefault(s => s.HostType == ServiceHost.Host.HostType) ?? startScripts.First(s => s.HostType == HostType.Generic);
-        Console.WriteLine("Running " + startScript.Script + " in " + ServiceHost.WorkingDirectory);
+        await RunScript(startScript);
+    }
 
-        ClientService.Clients.User(ServiceHost.Host.Name).SendAsync("RunScript", ServiceHost.WorkingDirectory, startScript.Script);
+    public async void Stop()
+    {
+        Console.WriteLine("Stopping " + ServiceHost.Service.Name + " on " + ServiceHost.Host.Name);
+        var stopScripts = Context.ServiceScripts.Where(script => script.ServiceId == ServiceHost.ServiceId && script.ScriptType == ScriptType.ShutDown).ToList();
+        var stopScript = stopScripts.FirstOrDefault(s => s.HostType == ServiceHost.Host.HostType) ?? stopScripts.First(s => s.HostType == HostType.Generic);
+        await RunScript(stopScript);
+    }
+
+
+    public async Task RunScript(ServiceScript script)
+    {
+        Console.WriteLine("Running " + script.Script + " in " + ServiceHost.WorkingDirectory);
+        var runConfig = new RunConfig()
+            {
+                WorkingDirectory = ServiceHost.WorkingDirectory,
+                Command = script.Script,
+                HostType = ServiceHost.Host.HostType,
+            };
+        foreach (var envVar in ServiceHost.EnvironmentVariables)
+            runConfig.EnvironmentVariables[envVar.Variable] = envVar.Value;
+
+        await ClientService.Clients.User(ServiceHost.Host.Name).SendAsync("RunScript", runConfig);
     }
 }

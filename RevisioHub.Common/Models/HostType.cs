@@ -1,4 +1,4 @@
-﻿namespace RevisioHub.Web.Model.Db.Services;
+﻿namespace RevisioHub.Common.Models;
 
 public enum HostType
 {

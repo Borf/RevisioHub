@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace RevisioHub.Web.Model.Db.Services;
+namespace RevisioHub.Common.Models.db;
 
 public class Service
 {

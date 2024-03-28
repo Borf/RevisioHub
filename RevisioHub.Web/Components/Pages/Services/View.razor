@@ -1,9 +1,15 @@
 ﻿@page "/Services/{ServiceId:int}"
+@rendermode InteractiveServer
 @using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.SignalR
 @using Microsoft.EntityFrameworkCore
+@using RevisioHub.Common.Models
 @using RevisioHub.Web.Components.Account.Shared
 @using RevisioHub.Web.Model.Db.Services
+@using RevisioHub.Common.Models.db;
+@using RevisioHub.Web.Services
 @inject Context Context;
+@inject IHubContext<ClientService> ClientService;
 
 <div class="container border m-0 p-3 rounded rounded-3">
     <h4>Hosts</h4>
@@ -104,6 +110,8 @@
         Context.ServiceScripts.Add(serviceScript);
         await Context.SaveChangesAsync();
         Script = new();
+        foreach (var sh in Context.ServiceHosts.Where(sh => sh.ServiceId == serviceScript.ServiceId).Select(sh => sh.Host.Name).Distinct())
+            await ClientService.ClientConfigUpdated(sh, Context);
     }
 
 
@@ -118,6 +126,7 @@
         Context.ServiceHosts.Add(serviceHost);
         await Context.SaveChangesAsync();
         ServiceHost = new();
+        await ClientService.ClientConfigUpdated(Context.Hosts.Find(ServiceHost.HostId)!.Name, Context);
     }
 
     private sealed class ScriptModel

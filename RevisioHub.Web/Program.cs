@@ -12,6 +12,8 @@ using System.Text;
 using Microsoft.Net.Http.Headers;
 using RevisioHub.Web.Model;
 using Microsoft.Extensions.DependencyInjection;
+using RevisioHub.Web.Controllers;
+using System.Text.Json;
 
 Configuration configuration = new();
 
@@ -28,13 +30,18 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
-builder.Services.AddSignalR();
+builder.Services.AddSignalR()
+    .AddJsonProtocol(options =>
+    {
+        options.PayloadSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+    });
 
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddSingleton(configuration);
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+builder.Services.AddSingleton<ServiceStatusService>();
 
 builder.Services.AddAuthentication(options =>
     {
@@ -81,7 +88,7 @@ builder.Services.AddAuthentication(options =>
         options.ForwardDefaultSelector = context =>
         {
             // filter by auth type
-            string authorization = context.Request.Headers[HeaderNames.Authorization];
+            string? authorization = context.Request.Headers[HeaderNames.Authorization];
             if (!string.IsNullOrEmpty(authorization) && authorization.StartsWith("Bearer "))
                 return JwtBearerDefaults.AuthenticationScheme;
 
@@ -130,7 +137,10 @@ app.Services.CreateScope().ServiceProvider.GetRequiredService<ApplicationDbConte
 app.Services.CreateScope().ServiceProvider.GetRequiredService<Context>().Database.EnsureCreated();
 app.MapHub<ClientService>("/Client");
 
-app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions()
+{ 
+   ServeUnknownFileTypes = true,
+});
 app.UseAntiforgery();
 
 app.MapRazorComponents<App>()

@@ -1,7 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using RevisioHub.Common.Models;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RevisioHub.Web.Model.Db.Services;
+namespace RevisioHub.Common.Models.db;
 
 public class ServiceScript
 {

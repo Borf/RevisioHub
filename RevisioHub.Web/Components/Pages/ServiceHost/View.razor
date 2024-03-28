@@ -4,6 +4,7 @@
 @using Microsoft.AspNetCore.SignalR
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.IdentityModel.Tokens
+@using RevisioHub.Common.Models.db
 @using RevisioHub.Web.Components.Account.Shared
 @using RevisioHub.Web.Model
 @using RevisioHub.Web.Model.Db.Services
@@ -18,9 +19,12 @@
 
 <h4>Service @ServiceHost.Host.Name on @ServiceHost.Host.Name</h4>
 Host type
+<EditForm Model="ServiceHost" method="post" OnValidSubmit="UpdateServiceHost" FormName="UpdateServiceHost">
 <input class="form-control disabled" @bind="@ServiceHost.Host.HostType" />
 Working Directory
 <input class="form-control" @bind="ServiceHost.WorkingDirectory" />
+    <input class="form-control w-100 btn btn-primary" type="submit" value="Update" />
+</EditForm>
 
 <h5>Environment variables</h5>
 <ul class="list-group list-group">
@@ -47,6 +51,13 @@ Working Directory
 
     [SupplyParameterFromForm]
     private EnvironmentVariableModel EnvironmentVariable { get; set; } = new();
+
+    public async Task UpdateServiceHost()
+    {
+        Context.ServiceHosts.Update(ServiceHost);
+        await Context.SaveChangesAsync();
+    }
+
 
     public async Task AddVariable(EditContext editContext)
     {

@@ -1,4 +1,4 @@
-﻿namespace RevisioHub.Web;
+﻿namespace RevisioHub.Common.Models;
 
 public enum ScriptType
 {
@@ -8,5 +8,6 @@ public enum ScriptType
     Reset,
     Status,
     Update,
-    CleanCache
+    CleanCache,
+    Install,
 }

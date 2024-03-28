@@ -1,7 +1,22 @@
 ﻿@page "/"
+@using Microsoft.EntityFrameworkCore
+@using RevisioHub.Web.Model.Db.Services
+@inject Context Context;
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<AuthorizeView>
+    <Authorized>
+        <h1>Service Status</h1>
 
-Welcome to your new app.
+        <ul class="list-group">
+            @foreach(var ServiceHost in Context.ServiceHosts)
+            {
+                <ServiceHostLi ServiceHostId="ServiceHost.Id"/>
+            }
+        </ul>
+    </Authorized>
+    <NotAuthorized>
+        Please Login
+    </NotAuthorized>
+</AuthorizeView>

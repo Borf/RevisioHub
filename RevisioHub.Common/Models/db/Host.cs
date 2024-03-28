@@ -1,6 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using RevisioHub.Common.Models;
+using System.ComponentModel.DataAnnotations;
 
-namespace RevisioHub.Web.Model.Db.Services;
+namespace RevisioHub.Common.Models.db;
 
 public class Host
 {

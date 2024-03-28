@@ -1,14 +1,20 @@
 ﻿@page "/Scripts/{ScriptId:int}"
+@rendermode InteractiveServer
 @using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.SignalR
 @using Microsoft.EntityFrameworkCore
+@using RevisioHub.Common.Models
 @using RevisioHub.Web.Components.Account.Shared
 @using RevisioHub.Web.Model.Db.Services
+@using RevisioHub.Common.Models.db;
+@using RevisioHub.Web.Services
 @inject Context Context;
 @inject NavigationManager NavigationManager;
+@inject IHubContext<ClientService> ClientService;
 
 
 <hr />
-<EditForm Model="Script" method="post" OnValidSubmit="UpdateScript" FormName="UpdateScript" @ref=Form>
+<EditForm Model="Script" method="post" OnValidSubmit="UpdateScript" FormName="UpdateScript">
     <div class="form-floating mb-3">
         <InputSelect class="form-control" @bind-Value="Script.ScriptType" TValue="ScriptType">
             @foreach (var scriptType in Enum.GetValues<ScriptType>())
@@ -27,9 +33,7 @@
         </InputSelect>
         <label>Host Type</label>
     </div>
-    <InputTextArea class="form-control script" style="height: 300px" @bind-Value="Script.Script">
-
-    </InputTextArea>
+    <InputTextArea class="form-control script" style="height: 300px" @bind-Value="Script.Script"></InputTextArea>
     <button type="submit" class="btn w-100 btn-lg btn-primary">Save</button>
 </EditForm>
 
@@ -43,7 +47,6 @@
 
     public ServiceScript Script { get; set; } = null!;
     public bool Apply { get; set; }
-    public EditForm Form { get; set; }
 
     protected override void OnInitialized()
     {
@@ -55,7 +58,8 @@
     {
         Context.ServiceScripts.Update(Script);
         await Context.SaveChangesAsync();
-
+        foreach (var sh in Context.ServiceHosts.Where(sh => sh.ServiceId == Script.ServiceId).Select(sh => sh.Host.Name).Distinct())
+            await ClientService.ClientConfigUpdated(sh, Context);
         if(!Apply)
             NavigationManager.NavigateTo($"/Services/{Script.ServiceId}");
     }
