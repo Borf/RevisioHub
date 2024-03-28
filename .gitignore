@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 
 /RevisioHub.Web/Database*
+/RevisioHub.Web/wwwroot/clients/linux-arm64/RevisioHub.Client
