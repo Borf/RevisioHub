@@ -1,0 +1,16 @@
+version: "3"
+services:
+    revisiohub:
+        container_name: revisiohub
+        image: revisiohub
+        restart: always
+        environment:
+          - JwtSecret=${JwtSecret}
+          - JwtIssuer=${JwtIssuer}
+          - JwtAudience=${JwtAudience}
+        ports:
+          - 2001:2001/tcp
+        volumes:
+          - ./keys:/root/.aspnet/DataProtection-Keys
+          - ./Database.db:/app/Database.db
+          - ./Database2.db:/app/Database2.db
