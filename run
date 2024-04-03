@@ -1,0 +1,5 @@
+git pull
+docker build -t revisiohub .
+docker stop revisiohub
+docker rm revisiohub
+docker run -d -p 2001:2001 -v /home/borf/revisiohub/Database.db:/app/Database.db -v /home/borf/revisiohub/Database2.db:/app/Database2.db --name revisiohub revisiohub

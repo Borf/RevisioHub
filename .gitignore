@@ -364,3 +364,5 @@ FodyWeavers.xsd
 
 /RevisioHub.Web/Database*
 /RevisioHub.Web/wwwroot/clients
+Database.db
+Database2.db
