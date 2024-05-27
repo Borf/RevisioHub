@@ -126,7 +126,7 @@
         Context.ServiceHosts.Add(serviceHost);
         await Context.SaveChangesAsync();
         ServiceHost = new();
-        await ClientService.ClientConfigUpdated(Context.Hosts.Find(ServiceHost.HostId)!.Name, Context);
+        await ClientService.ClientConfigUpdated(Context.Hosts.Find(serviceHost.HostId)!.Name, Context);
     }
 
     private sealed class ScriptModel
