@@ -366,3 +366,5 @@ FodyWeavers.xsd
 /RevisioHub.Web/wwwroot/clients
 Database.db
 Database2.db
+keys
+.env
