@@ -12,7 +12,7 @@
 @{
     var status = @ServiceStatusService.GetValueOrDefault(ServiceHost.Id, "-");
     var bgColor = "bg-danger";
-    if (status == "Running")
+    if (status.StartsWith("Running"))
         bgColor = "bg-success";
 }
 <li class="list-group-item">
