@@ -72,6 +72,6 @@ public class ServiceStatus
 
     public override string? ToString()
     {
-        return $"{nameof(ServiceStatus)} ({Status}, {CpuPerc}, {Mem})";
+        return $"{nameof(ServiceStatus)} ({Status}, {CpuPerc}, {Mem}, {NetIO})";
     }
 }
