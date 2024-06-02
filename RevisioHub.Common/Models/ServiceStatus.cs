@@ -44,6 +44,12 @@ public class ServiceStatus
                 var value = splitted[1].Trim();
                 if (value.Contains("%"))
                     value = value.Substring(0, value.IndexOf("%")).Trim();
+                if (value.Contains("B"))
+                    value = value.Substring(0, value.IndexOf("B")).Trim();
+                if (value.Contains("M"))
+                    value = value.Substring(0, value.IndexOf("M")).Trim();
+                if (value.Contains("G"))
+                    value = value.Substring(0, value.IndexOf("G")).Trim();
                 Mem = float.Parse(value);
             }
         }
