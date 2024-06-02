@@ -185,6 +185,8 @@ public class Program
         string output = "";
         while (!process.StandardOutput.EndOfStream)
             output += process.StandardOutput.ReadLine() + "\n";
+        if (output.EndsWith("\n"))
+            output = output.Substring(0, output.Length - 1);
         await process!.WaitForExitAsync();
         return output;
     }
