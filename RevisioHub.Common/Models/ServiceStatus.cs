@@ -53,7 +53,7 @@ public class ServiceStatus
                     value = value.Substring(0, value.IndexOf("G")).Trim();
                 Mem = float.Parse(value);
             }
-            else if (splitted[0].ToLower().Contains("Net"))
+            else if (splitted[0].ToLower().Contains("net"))
             {
                 var value = splitted[1].Trim();
                 NetIO = value;
