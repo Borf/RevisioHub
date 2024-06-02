@@ -12,6 +12,7 @@ public class ServiceStatus
     public string Status { get; set; } = "-";
     public float CpuPerc { get; set; } = 0;
     public float Mem { get; set; } = 0;
+    public string NetIO { get; set; } = "";
 
 
     public ServiceStatus()
@@ -51,6 +52,11 @@ public class ServiceStatus
                 if (value.Contains("G"))
                     value = value.Substring(0, value.IndexOf("G")).Trim();
                 Mem = float.Parse(value);
+            }
+            else if (splitted[0].ToLower().Contains("Net"))
+            {
+                var value = splitted[1].Trim();
+                NetIO = value;
             }
         }
         else
