@@ -86,6 +86,7 @@ public class Program
                         continue;
                     Console.WriteLine("getting status for " + service.Service.Name);
                     string status = await RunScript(service, statusScript);
+                    Console.WriteLine("Status: " + status);
                     await connection.SendAsync("Status", service.Id, new ServiceStatus(status));
                 }catch(Exception ex)
                 {
