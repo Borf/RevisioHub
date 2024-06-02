@@ -184,7 +184,7 @@ public class Program
             return "Error";
         string output = "";
         while (!process.StandardOutput.EndOfStream)
-            output += process.StandardOutput.ReadLine();
+            output += process.StandardOutput.ReadLine() + "\n";
         await process!.WaitForExitAsync();
         return output;
     }
