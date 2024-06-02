@@ -57,4 +57,9 @@ public class ServiceStatus
                 Mem = float.Parse(line);
         }
     }
+
+    public override string? ToString()
+    {
+        return $"{nameof(ServiceStatus)} ({Status}, {CpuPerc}, {Mem})";
+    }
 }
