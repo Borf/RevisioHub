@@ -42,6 +42,7 @@ builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 builder.Services.AddSingleton<ServiceStatusService>();
+builder.Services.AddSingleton<ServiceVersionService>();
 
 builder.Services.AddAuthentication(options =>
     {

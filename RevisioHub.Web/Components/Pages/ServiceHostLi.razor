@@ -8,25 +8,41 @@
 @inject IHubContext<ClientService> ClientService;
 @inject Context Context;
 @inject ServiceStatusService ServiceStatusService;
+@inject ServiceVersionService ServiceVersionService;
 
 @{
-    var status = @ServiceStatusService.GetValueOrDefault(ServiceHost.Id, "-");
+    var status = ServiceStatusService.GetValueOrDefault(ServiceHost.Id, new ServiceStatus());
     var bgColor = "bg-danger";
-    if (status.StartsWith("Running"))
+    if (status.Status.StartsWith("Running"))
         bgColor = "bg-success";
 }
-<li class="list-group-item">
-    <div style="display: inline-block">
-        <a class="btn btn-sm btn-primary" style="width: 130px">@ServiceHost.Service.Name</a>
-        on 
-        <a class="btn btn-sm btn-primary" style="width: 100px">@ServiceHost.Host.Name</a>
-    </div>
-    <span class="badge @bgColor" style="margin-left: 10px;">@status</span>
-    <div class="btn-group" style="float: right;">
-        <a href="/ServiceHost/@ServiceHost.Id" class="btn btn-sm btn-secondary">Edit</a>
-        <button @onclick="Start" class="btn btn-sm btn-success">Start</button>
-        <button @onclick="Stop" class="btn btn-sm btn-danger">Stop</button>
-        <button class="btn btn-sm btn-info">Update</button>
+<li class="list-group-item border m-1 rounded card" style="width: 300px;">
+    <div class="card-body p-0">
+        <div class="card-header">
+            <a style="width: 130px; text-decoration: none;" href="/Services/@ServiceHost.Service.Id" class="link-light fw-bold">@ServiceHost.Service.Name</a>
+            on 
+            <a style="width: 100px; text-decoration: none;" href="/Hosts/@ServiceHost.Host.Id" class="link-light fw-bold">@ServiceHost.Host.Name</a>
+        </div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item @bgColor p-1">@status.Status</li>
+            <li class="list-group-item p-1">
+                <div class="row">
+                    <div class="col"><span class="bi bi-cpu m-1"></span>@status.CpuPerc</div>
+                    <div class="col"><span class="bi bi-memory m-1"></span>@status.Mem</div>
+                </div>
+            </li>
+            <li class="list-group-item p-1" style="font-size: 0.7rem" title="Running Version">
+                <span class="bi bi-git m-1"></span>
+                @ServiceVersionService.GetValueOrDefault(ServiceHost.Id, "?")
+            </li>
+        </ul>
+        <div class="btn-group" style="width: 100%">
+            <a href="/ServiceHost/@ServiceHost.Id" class="btn btn-sm btn-secondary">Edit</a>
+            <button @onclick="Start" class="btn btn-sm btn-success">Start</button>
+            <button @onclick="Stop" class="btn btn-sm btn-danger">Stop</button>
+            <button class="btn btn-sm btn-info">Update</button>
+            <button class="btn btn-sm btn-primary">Log</button>
+        </div>
     </div>
 </li>
 

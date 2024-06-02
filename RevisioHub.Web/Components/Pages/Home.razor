@@ -7,9 +7,10 @@
 
 <AuthorizeView>
     <Authorized>
-        <h1>Service Status</h1>
+        <h1>Host Status</h1>
 
-        <ul class="list-group">
+        <h1>Service Status</h1>
+        <ul class="d-flex flex-wrap p-0">
             @foreach(var ServiceHost in Context.ServiceHosts)
             {
                 <ServiceHostLi ServiceHostId="ServiceHost.Id"/>

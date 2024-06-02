@@ -74,6 +74,7 @@ public class Program
     private static async Task WatchDog()
     {
         Console.WriteLine("Starting watchdog");
+        int versionCheck = 0;
         while(!QuitTokenSource.Token.IsCancellationRequested)
         {
             foreach(var service in HostInfo.ServiceHosts)
@@ -85,12 +86,30 @@ public class Program
                         continue;
                     Console.WriteLine("getting status for " + service.Service.Name);
                     string status = await RunScript(service, statusScript);
-                    await connection.SendAsync("Status", service.Id, status);
+                    await connection.SendAsync("Status", service.Id, new ServiceStatus(status));
                 }catch(Exception ex)
                 {
                     Console.WriteLine(ex);
                 }
+                if(versionCheck == 0)
+                {
+                    try
+                    {
+                        var versionScript = service.Service.ServiceScripts.FirstOrDefault(sc => sc.ScriptType == ScriptType.Version && sc.HostType == HostInfo.HostType) ?? service.Service.ServiceScripts.FirstOrDefault(sc => sc.ScriptType == ScriptType.Version && sc.HostType == HostType.Generic);
+                        if (versionScript == null)
+                            continue;
+                        Console.WriteLine("getting version for " + service.Service.Name);
+                        string version = await RunScript(service, versionScript);
+                        await connection.SendAsync("Version", service.Id, version);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex);
+                    }
+
+                }
             }
+            versionCheck = (versionCheck + 1) % 30;
             await Task.Delay(TimeSpan.FromSeconds(10), QuitTokenSource.Token);
         }
     }

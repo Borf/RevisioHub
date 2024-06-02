@@ -5,13 +5,13 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace RevisioHub.Web.Services;
 
-public class ServiceStatusService : IDictionary<int, ServiceStatus>, INotifyCollectionChanged
+public class ServiceVersionService : IDictionary<int, string>, INotifyCollectionChanged
 {
-    private Dictionary<int, ServiceStatus> status = new();
+    private Dictionary<int, string> status = new();
 
     public event NotifyCollectionChangedEventHandler? CollectionChanged;
 
-    public ServiceStatus this[int key]
+    public string this[int key]
     {
         get => status[key];
         set
@@ -23,10 +23,10 @@ public class ServiceStatusService : IDictionary<int, ServiceStatus>, INotifyColl
     }
 
     public ICollection<int> Keys => status.Keys;
-    public ICollection<ServiceStatus> Values => status.Values;
+    public ICollection<string> Values => status.Values;
     public int Count => ((ICollection<KeyValuePair<int, string>>)status).Count;
     public bool IsReadOnly => ((ICollection<KeyValuePair<int, string>>)status).IsReadOnly;
-    public void Add(int key, ServiceStatus value)
+    public void Add(int key, string value)
     {
         status.Add(key, value);
         if (CollectionChanged != null)
@@ -40,9 +40,9 @@ public class ServiceStatusService : IDictionary<int, ServiceStatus>, INotifyColl
             CollectionChanged.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
     }
 
-    public bool Contains(KeyValuePair<int, ServiceStatus> item) => status.Contains(item);
+    public bool Contains(KeyValuePair<int, string> item) => status.Contains(item);
     public bool ContainsKey(int key) => status.ContainsKey(key);
-    public IEnumerator<KeyValuePair<int, ServiceStatus>> GetEnumerator() => status.GetEnumerator();
+    public IEnumerator<KeyValuePair<int, string>> GetEnumerator() => status.GetEnumerator();
     public bool Remove(int key)
     {
         if (CollectionChanged != null)
@@ -51,28 +51,28 @@ public class ServiceStatusService : IDictionary<int, ServiceStatus>, INotifyColl
     }
 
     IEnumerator IEnumerable.GetEnumerator() => status.GetEnumerator();
-    public bool TryGetValue(int key, [MaybeNullWhen(false)] out ServiceStatus value) => status.TryGetValue(key, out value);
+    public bool TryGetValue(int key, [MaybeNullWhen(false)] out string value) => status.TryGetValue(key, out value);
 
-    public void CopyTo(KeyValuePair<int, ServiceStatus>[] array, int arrayIndex)
+    public void CopyTo(KeyValuePair<int, string>[] array, int arrayIndex)
     {
-        ((ICollection<KeyValuePair<int, ServiceStatus>>)status).CopyTo(array, arrayIndex);
+        ((ICollection<KeyValuePair<int, string>>)status).CopyTo(array, arrayIndex);
     }
 
-    public void Add(KeyValuePair<int, ServiceStatus> item)
+    public void Add(KeyValuePair<int, string> item)
     {
-        ((ICollection<KeyValuePair<int, ServiceStatus>>)status).Add(item);
+        ((ICollection<KeyValuePair<int, string>>)status).Add(item);
         if (CollectionChanged != null)
             CollectionChanged.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
     }
 
-    public bool Remove(KeyValuePair<int, ServiceStatus> item)
+    public bool Remove(KeyValuePair<int, string> item)
     {
         if (CollectionChanged != null)
             CollectionChanged.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
-        return ((ICollection<KeyValuePair<int, ServiceStatus>>)status).Remove(item);
+        return ((ICollection<KeyValuePair<int, string>>)status).Remove(item);
     }
 
-    public ServiceStatus GetValueOrDefault(int key, ServiceStatus defaultValue) => status.GetValueOrDefault(key, defaultValue);
+    public string GetValueOrDefault(int key, string defaultValue) => status.GetValueOrDefault(key, defaultValue);
 
 
 }

@@ -10,4 +10,5 @@ public enum ScriptType
     Update,
     CleanCache,
     Install,
+    Version,
 }

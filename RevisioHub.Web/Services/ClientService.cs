@@ -22,10 +22,12 @@ public class ClientService : Hub
     public static ObservableCollection<string> Users { get; set; } = new();
     private IServiceProvider serviceProvider;
     private ServiceStatusService serviceStatus;
-    public ClientService(IServiceProvider serviceProvider, ServiceStatusService serviceStatus)
+    private ServiceVersionService serviceVersion;
+    public ClientService(IServiceProvider serviceProvider, ServiceStatusService serviceStatus, ServiceVersionService serviceVersion)
     {
         this.serviceProvider = serviceProvider;
         this.serviceStatus = serviceStatus;
+        this.serviceVersion = serviceVersion;
     }
 
     public override async Task OnConnectedAsync()
@@ -53,10 +55,16 @@ public class ClientService : Hub
         return base.OnDisconnectedAsync(exception);
     }
 
-    public void Status(int serviceHostId, string status)
+    public void Status(int serviceHostId, ServiceStatus status)
     {
         serviceStatus[serviceHostId] = status;
         Console.WriteLine("Status for " + serviceHostId + " is now " + status);
+    }
+
+    public void Version(int serviceHostId, string version)
+    {
+        serviceVersion[serviceHostId] = version;
+        Console.WriteLine("Version is " + version);
     }
 
 }
