@@ -33,9 +33,19 @@ public class ServiceStatus
             if (splitted[0].ToLower().Contains("status"))
                 Status = splitted[1];
             else if (splitted[0].ToLower().Contains("cpu"))
-                CpuPerc = float.Parse(splitted[1]);
+            {
+                var value = splitted[1].Trim();
+                if (value.Contains("%"))
+                    value = value.Substring(0, value.IndexOf("%")).Trim();
+                CpuPerc = float.Parse(value);
+            }
             else if (splitted[0].ToLower().Contains("mem"))
-                Mem = float.Parse(splitted[1]);
+            {
+                var value = splitted[1].Trim();
+                if (value.Contains("%"))
+                    value = value.Substring(0, value.IndexOf("%")).Trim();
+                Mem = float.Parse(value);
+            }
         }
         else
         {
