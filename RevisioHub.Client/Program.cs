@@ -59,6 +59,7 @@ public class Program
         connection.On<Host>("HostInfo", OnHostInfo);
         connection.On("Pong", () => Console.WriteLine("Pong received"));
         connection.On<RunConfig>("RunScript", OnRunScript);
+        connection.On("Restart", OnRestart);
 
 
         Console.WriteLine("Connecting to server");
@@ -69,6 +70,11 @@ public class Program
         _ = Task.Run(WatchDog);
 
         await Task.Delay(-1);
+    }
+
+    private static void OnRestart()
+    {
+        Environment.Exit(0);
     }
 
     private static async Task WatchDog()
