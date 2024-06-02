@@ -18,6 +18,10 @@
 @inject IHubContext<ClientService> ClientService;
 
 <div class="container mb-5">
+    <button class="btn btn-lg btn-danger" @onclick="RestartHost" style="width: 100%;">Update & Restart revisiohub on this host</button>
+</div>
+
+<div class="container mb-5">
     <h4>Services on @Host.Name</h4>
     <ul class="d-flex flex-wrap p-0">
     @foreach (var serviceHost in Host.ServiceHosts)
@@ -65,8 +69,8 @@
     </textarea>
 </div>
 
-    @code {
-        [Parameter]
+@code {
+    [Parameter]
     public int HostId { get; set; } = 0;
 
     public Host Host => Context.Hosts.Include(h => h.ServiceHosts).ThenInclude(sh => sh.Service).First(s => s.Id == HostId);
@@ -75,5 +79,10 @@
     {
         Context.Hosts.Update(Host);
         await Context.SaveChangesAsync();
+    }
+
+    public async Task RestartHost()
+    {
+        await ClientService.Clients.User(Host.Name).SendAsync("Restart");
     }
 }
