@@ -90,9 +90,9 @@ public class Program
                     var statusScript = service.Service.ServiceScripts.FirstOrDefault(sc => sc.ScriptType == ScriptType.Status && sc.HostType == HostInfo.HostType) ?? service.Service.ServiceScripts.FirstOrDefault(sc => sc.ScriptType == ScriptType.Status && sc.HostType == HostType.Generic);
                     if (statusScript == null)
                         continue;
-                    Console.WriteLine("getting status for " + service.Service.Name);
+                    //Console.WriteLine("getting status for " + service.Service.Name);
                     string status = await RunScript(service, statusScript);
-                    Console.WriteLine("Status: " + status);
+                    //Console.WriteLine("Status: " + status);
                     await connection.SendAsync("Status", service.Id, new ServiceStatus(status));
                 }catch(Exception ex)
                 {
@@ -105,7 +105,7 @@ public class Program
                         var versionScript = service.Service.ServiceScripts.FirstOrDefault(sc => sc.ScriptType == ScriptType.Version && sc.HostType == HostInfo.HostType) ?? service.Service.ServiceScripts.FirstOrDefault(sc => sc.ScriptType == ScriptType.Version && sc.HostType == HostType.Generic);
                         if (versionScript == null)
                             continue;
-                        Console.WriteLine("getting version for " + service.Service.Name);
+                        //Console.WriteLine("getting version for " + service.Service.Name);
                         string version = await RunScript(service, versionScript);
                         await connection.SendAsync("Version", service.Id, version);
                     }

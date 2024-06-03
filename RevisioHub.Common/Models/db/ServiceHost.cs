@@ -17,5 +17,5 @@ public class ServiceHost
     public Service Service { get; set; } = null!;
     public string WorkingDirectory { get; set; } = string.Empty;
     public List<EnvironmentVariable> EnvironmentVariables { get; set; } = new();
-
+    public string EndPoint { get; set; } = string.Empty;
 }
