@@ -1,0 +1,79 @@
+﻿@page "/ServiceHost/{ServiceHostId:int}/Log"
+@implements IDisposable
+@rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.SignalR
+@using Microsoft.EntityFrameworkCore
+@using RevisioHub.Common.Models.db
+@using RevisioHub.Web.Model
+@using RevisioHub.Web.Model.Db.Services
+@using System.Security.Claims
+@using RevisioHub.Web.Services
+@using Microsoft.JSInterop
+@using System.Collections.Specialized
+@inject Context Context;
+@inject Configuration configuration;
+@inject ServiceLogService logService;
+@inject IHubContext<ClientService> ClientService;
+@inject IJSRuntime JS
+
+
+<h4>Service @ServiceHost.Host.Name on @ServiceHost.Host.Name</h4>
+<textarea @ref="TextAreaRef" class="form-control" rows="10" style="font-family: consolas; height: 300px">@LogData</textarea>
+
+
+@code {
+    [Parameter]
+    public Common.Models.db.ServiceHost ServiceHost { get; set; } = null!;
+    [Parameter]
+    public int ServiceHostId { get; set; } = -1;
+
+    public string LogData { get; set; } = "";
+    public CancellationTokenSource ts = new();
+    ElementReference TextAreaRef;
+
+    protected override void OnInitialized()
+    {
+        if (ServiceHostId != -1)
+            ServiceHost = Context.ServiceHosts.Include(h => h.Host).First(host => host.Id == ServiceHostId); //eww, but [Parameter] doesn't like cyclic references
+
+        Task.Run(BgTask);
+        logService.CollectionChanged += OnLog;
+
+        base.OnInitialized();
+    }
+
+    public async Task BgTask()
+    {
+        try
+        {
+            while (!ts.Token.IsCancellationRequested)
+            {
+                await ClientService.Clients.User(ServiceHost.Host.Name).SendAsync("Log", ServiceHost.Id, ts.Token);
+                await JS.InvokeVoidAsync("scrollToEnd", new object[] { TextAreaRef });
+                await Task.Delay(TimeSpan.FromSeconds(1), ts.Token);
+            }
+        }
+        catch (System.InvalidOperationException) { }
+        catch(Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+        Console.WriteLine("Stopping logging getter");
+    }
+
+
+    public void Dispose()
+    {
+        Console.WriteLine("Cancelling...");
+        logService.CollectionChanged -= OnLog;
+        ts.Cancel();
+    }
+
+    private async void OnLog(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        LogData = logService[ServiceHost.Id];
+        await InvokeAsync(StateHasChanged);
+    }
+
+}

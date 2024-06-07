@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using RevisioHub.Client;
 using RevisioHub.Common.Models;
 using RevisioHub.Common.Models.db;
+using System;
 using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -60,6 +61,7 @@ public class Program
         connection.On("Pong", () => Console.WriteLine("Pong received"));
         connection.On<RunConfig>("RunScript", OnRunScript);
         connection.On("Restart", OnRestart);
+        connection.On<int>("Log", OnLog);
 
 
         Console.WriteLine("Connecting to server");
@@ -70,6 +72,15 @@ public class Program
         _ = Task.Run(WatchDog);
 
         await Task.Delay(-1);
+    }
+
+    private static async Task OnLog(int serviceHostId)
+    {
+
+        var service = HostInfo.ServiceHosts.First(h => h.Id == serviceHostId);
+        var logScript = service.Service.ServiceScripts.FirstOrDefault(sc => sc.ScriptType == ScriptType.Logs && sc.HostType == HostInfo.HostType) ?? service.Service.ServiceScripts.FirstOrDefault(sc => sc.ScriptType == ScriptType.Logs && sc.HostType == HostType.Generic);
+        string log = await RunScript(service, logScript!);
+        await connection.SendAsync("OnLog", serviceHostId, log);
     }
 
     private static void OnRestart()
@@ -131,9 +142,13 @@ public class Program
     private static async Task OnRunScript(RunConfig runConfig)
     {
         string scriptFile = Path.Combine(runConfig.WorkingDirectory, "script");
+        string command = runConfig.Command;
         if (HostInfo.HostType == HostType.WindowsService || HostInfo.HostType == HostType.WindowsConsole)
+        {
             scriptFile = Path.Combine(runConfig.WorkingDirectory, "script.bat");
-        await File.WriteAllTextAsync(scriptFile, runConfig.Command);
+            command = "@echo off\n" + command;
+        }
+        await File.WriteAllTextAsync(scriptFile, command);
         if (HostInfo.HostType == HostType.Linux || HostInfo.HostType == HostType.DockerLinux)
             await Process.Start("chmod", "777 " + scriptFile).WaitForExitAsync();
 
@@ -160,9 +175,14 @@ public class Program
     private static async Task<string> RunScript(ServiceHost service, ServiceScript script)
     {
         string scriptFile = Path.Combine(service.WorkingDirectory, script.ScriptType.ToString());
+        string command = script.Script;
         if (HostInfo.HostType == HostType.WindowsService || HostInfo.HostType == HostType.WindowsConsole)
+        {
             scriptFile = Path.Combine(service.WorkingDirectory, script.ScriptType.ToString() + ".bat");
-        await File.WriteAllTextAsync(scriptFile, script.Script);
+            command = "@echo off\n" + command;
+        }
+
+        await File.WriteAllTextAsync(scriptFile, command);
         if (HostInfo.HostType == HostType.Linux || HostInfo.HostType == HostType.DockerLinux)
             await Process.Start("chmod", "777 " + scriptFile).WaitForExitAsync();
         

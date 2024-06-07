@@ -13,6 +13,7 @@ using System.ComponentModel;
 using System.Net;
 using System.Net.WebSockets;
 using System.Reflection;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace RevisioHub.Web.Services;
 
@@ -23,11 +24,16 @@ public class ClientService : Hub
     private IServiceProvider serviceProvider;
     private ServiceStatusService serviceStatus;
     private ServiceVersionService serviceVersion;
-    public ClientService(IServiceProvider serviceProvider, ServiceStatusService serviceStatus, ServiceVersionService serviceVersion)
+    private ServiceLogService serviceLog;
+
+    private Dictionary<string, List<string>> Connections = new();
+
+    public ClientService(IServiceProvider serviceProvider, ServiceStatusService serviceStatus, ServiceVersionService serviceVersion, ServiceLogService serviceLog)
     {
         this.serviceProvider = serviceProvider;
         this.serviceStatus = serviceStatus;
         this.serviceVersion = serviceVersion;
+        this.serviceLog = serviceLog;
     }
 
     public override async Task OnConnectedAsync()
@@ -44,6 +50,10 @@ public class ClientService : Hub
                 .First(h => h.Name == Context.UserIdentifier);
         Console.WriteLine("Sending info on " + host.Name);
 
+        if (!Connections.ContainsKey(Context.UserIdentifier!))
+            Connections[Context.UserIdentifier!] = new();
+        Connections[Context.UserIdentifier!].Add(Context.ConnectionId);
+
         await base.OnConnectedAsync();
         await Clients.Caller.SendAsync("HostInfo", host);
     }
@@ -51,6 +61,11 @@ public class ClientService : Hub
     public override Task OnDisconnectedAsync(Exception? exception)
     {
         Console.WriteLine("Client " + Context.UserIdentifier + " disconnected");
+        
+        if (Connections.ContainsKey(Context.UserIdentifier!))
+            if (Connections[Context.UserIdentifier!].Contains(Context.ConnectionId))
+                Connections[Context.UserIdentifier!].Remove(Context.ConnectionId);
+
         Users.Remove(Context.UserIdentifier!);
         return base.OnDisconnectedAsync(exception);
     }
@@ -67,6 +82,19 @@ public class ClientService : Hub
         Console.WriteLine("Version is " + version);
     }
 
+    public void OnLog(int serviceHostId, string data)
+    {
+        serviceLog[serviceHostId] = data;
+    }
+
+    public List<string> GetConnectionIds(string user)
+    {
+        if (Connections.ContainsKey(user))
+            return Connections[user];
+        else
+            return new();
+    }
+
 }
 
 
@@ -81,4 +109,5 @@ public static class ClientServiceExtensions
         Console.WriteLine("Sending info on " + host.Name);
         await clientService.Clients.User(name).SendAsync("HostInfo", host);
     }
+
 }

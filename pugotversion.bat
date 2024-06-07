@@ -1,0 +1,3 @@
+@echo off
+FOR /F "tokens=* USEBACKQ" %%g IN (`curl -s --user borf:bliep123 --header Accept:application/vnd.oci.image.index.v1+json https://dockerregistry.borf.nl/v2/pugot/manifests/latest ^| jq ".manifests[] | select((.platform.os==\"linux\") and (.platform.architecture==\"arm64\")) | .digest" -r`) do (SET "DIGEST=%%g")
+curl -s --user borf:bliep123 --header Accept:application/vnd.oci.image.manifest.v1+json https://dockerregistry.borf.nl/v2/pugot/manifests/%DIGEST% | jq ".config.digest" -r

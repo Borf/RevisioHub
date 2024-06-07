@@ -16,6 +16,7 @@
 @inject Context Context;
 @inject Configuration configuration;
 @inject IHubContext<ClientService> ClientService;
+@inject IHttpContextAccessor HttpContextAccessor;
 
 <div class="container mb-5">
     <button class="btn btn-lg btn-danger" @onclick="RestartHost" style="width: 100%;">Update & Restart revisiohub on this host</button>
@@ -48,25 +49,39 @@
         </InputSelect>
         <label>Host Type</label>
     </div>
+        <div class="form-floating mb-3">
+            <InputSelect class="form-control" @bind-Value=Host.Architecture TValue="Architecture">
+                @foreach (var architecture in Enum.GetValues<Architecture>())
+                {
+                    <option value="@architecture.ToString()">@architecture.ToString()</option>
+                }
+            </InputSelect>
+            <label>Host Type</label>
+        </div>
 
     <button type="submit" class="btn w-100 btn-lg btn-primary">Save</button>
 </EditForm>
 </div>
 <div class="container">
-<h5>JWT Key</h5>
-    <textarea class="form-control" style="font-family: consolas; height; 250px;" readonly>
     @{
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.JwtSecret));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-        var token = new JwtSecurityToken(configuration.JwtIssuer, configuration.JwtAudience,new Claim[] 
+        var token = new JwtSecurityToken(configuration.JwtIssuer, configuration.JwtAudience, new Claim[]
         {
-            new Claim(ClaimTypes.NameIdentifier, Host.Name),
-            new Claim("hostId", Host.Id+""),
+    new Claim(ClaimTypes.NameIdentifier, Host.Name),
+    new Claim("hostId", Host.Id+""),
         }, expires: DateTime.Now.AddYears(1), signingCredentials: credentials);
         var tokenStr = new JwtSecurityTokenHandler().WriteToken(token);
     }
-    @tokenStr
-    </textarea>
+    <h5>JWT Key</h5>
+    <textarea class="form-control" style="font-family: consolas; height: 90px;" readonly>@tokenStr</textarea>
+    <h5>Bash script</h5>
+    <textarea class="form-control" style="font-family: consolas; height: 150px; white-space: pre;" readonly>while :
+do
+wget @(HttpContextAccessor?.HttpContext?.Request?.Host)/clients/linux-arm64/RevisioHub.Client -O RevisioHub.Client
+sudo ./RevisioHub.Client --EndPoint http://@(HttpContextAccessor?.HttpContext?.Request?.Host)/Client --Jwt @tokenStr
+done</textarea>
+
 </div>
 
 @code {

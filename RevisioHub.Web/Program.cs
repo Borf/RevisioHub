@@ -14,6 +14,7 @@ using RevisioHub.Web.Model;
 using Microsoft.Extensions.DependencyInjection;
 using RevisioHub.Web.Controllers;
 using System.Text.Json;
+using RevisioHub.Common.Models.db;
 
 Configuration configuration = new();
 
@@ -42,7 +43,9 @@ builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 builder.Services.AddSingleton<ServiceStatusService>();
+builder.Services.AddSingleton<ServiceLogService>();
 builder.Services.AddSingleton<ServiceVersionService>();
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddAuthentication(options =>
     {

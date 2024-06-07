@@ -11,4 +11,6 @@ public enum ScriptType
     CleanCache,
     Install,
     Version,
+    Logs,
+    LatestVersion, // runs on web
 }
