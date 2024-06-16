@@ -118,6 +118,7 @@ public class ClientService : Hub
         var log = context.UpdateLogs.Find(logId);
         log.NewVersion = newVersion;
         await context.SaveChangesAsync();
+        serviceVersion[log.ServiceHostId] = newVersion;
         await serviceUpdateLog.UpdateLog(logId, log.Log);
     }
 
