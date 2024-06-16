@@ -63,7 +63,19 @@ public class ClientService : Hub
     public override Task OnDisconnectedAsync(Exception? exception)
     {
         Console.WriteLine("Client " + Context.UserIdentifier + " disconnected");
-        
+
+        using var scope = serviceProvider.CreateScope();
+        using var context = scope.ServiceProvider.GetRequiredService<Context>();
+
+        var host = context.Hosts
+                .Include(h => h.ServiceHosts).ThenInclude(sh => sh.EnvironmentVariables)
+                .Include(h => h.ServiceHosts).ThenInclude(sh => sh.Service).ThenInclude(s => s.ServiceScripts)
+                .First(h => h.Name == Context.UserIdentifier);
+
+        foreach (var sh in host.ServiceHosts)
+            serviceStatus[sh.Id] = new ServiceStatus() { Status = "Disconnected" };
+
+
         if (Connections.ContainsKey(Context.UserIdentifier!))
             if (Connections[Context.UserIdentifier!].Contains(Context.ConnectionId))
                 Connections[Context.UserIdentifier!].Remove(Context.ConnectionId);
