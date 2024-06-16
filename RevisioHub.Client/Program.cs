@@ -265,12 +265,13 @@ public class Program
             psi.Arguments = scriptFile;
         }
 
-
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
 
         var process = Process.Start(psi);
         if (process == null)
             return;
-        string output = "";
+        string output = $"Updating {service?.Service?.Name} on {service?.Host?.Name}\n";
         while (!process.StandardOutput.EndOfStream)
         {
             while (process.StandardOutput.Peek() != -1)
@@ -280,8 +281,7 @@ public class Program
             await connection.SendAsync(callback, id, output);
             await Task.Delay(1);
         }
-        if (output.EndsWith("\n"))
-            output = output.Substring(0, output.Length - 1);
+        output += $"Done updating {service?.Service?.Name} on {service?.Host?.Name} in {stopwatch.Elapsed}\n";
         await connection.SendAsync(callback, id, output);
         await process!.WaitForExitAsync();
         return;
