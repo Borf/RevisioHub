@@ -252,6 +252,7 @@ public class Program
             FileName = scriptFile,
             WorkingDirectory = service.WorkingDirectory,
             RedirectStandardOutput = true,
+            RedirectStandardError = true,
             CreateNoWindow = true,
             UseShellExecute = false,
         };
@@ -273,10 +274,11 @@ public class Program
         while (!process.StandardOutput.EndOfStream)
         {
             while (process.StandardOutput.Peek() != -1)
-            {
                 output += process.StandardOutput.ReadLine() + "\n";
-            }
+            while (process.StandardError.Peek() != -1)
+                output += process.StandardError.ReadLine() + "\n";
             await connection.SendAsync(callback, id, output);
+            await Task.Delay(1);
         }
         if (output.EndsWith("\n"))
             output = output.Substring(0, output.Length - 1);
