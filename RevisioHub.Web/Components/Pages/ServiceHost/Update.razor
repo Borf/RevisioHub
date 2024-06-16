@@ -1,0 +1,103 @@
+﻿@page "/ServiceHost/{ServiceHostId:int}/Update/{LogId:int}"
+@page "/ServiceHost/{ServiceHostId:int}/Update"
+@implements IDisposable
+@rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.SignalR
+@using Microsoft.EntityFrameworkCore
+@using RevisioHub.Common.Models
+@using RevisioHub.Common.Models.db
+@using RevisioHub.Web.Model
+@using RevisioHub.Web.Model.Db.Services
+@using System.Security.Claims
+@using RevisioHub.Web.Services
+@using Microsoft.JSInterop
+@using System.Collections.Specialized
+@inject Context Context;
+@inject Configuration configuration;
+@inject ServiceLogService logService;
+@inject ServiceVersionService versionService;
+@inject ServiceUpdateLogService updateService;
+@inject IHubContext<ClientService> ClientService;
+@inject IJSRuntime JS
+@inject NavigationManager NavigationManager;
+
+
+<h4>Service @ServiceHost.Host.Name on @ServiceHost.Host.Name</h4>
+<div class="container">
+    <button @onclick="StartUpdate" class="btn btn-primary">Start update</button>
+</div>
+
+
+<div class="row">
+    <div class="col-3">
+        <div class="list-group">
+            @foreach (var log in ServiceHost.UpdateLogs.OrderByDescending(l => l.DateTime))
+            {
+                <a class="@(log.Id == LogId ? "active" : "") list-group-item list-group-item-action" href="/ServiceHost/@ServiceHostId/Update/@log.Id">@log.DateTime @log.OriginalVersion to @log.NewVersion</a>
+            }
+        </div>
+    </div>
+    <div class="col">
+        <textarea class="form-control" style="font-family: consolas; height: 90vh;">@if (LogId > 0)
+            {
+                @Log
+            }</textarea>
+    </div>
+</div>
+@code {
+    public Common.Models.db.ServiceHost ServiceHost { get; set; } = null!;
+    public string Log { get; set; } = string.Empty;
+    [Parameter]
+    public int ServiceHostId { get; set; } = -1;
+    [Parameter]
+    public int LogId { get; set; } = -1;
+
+    protected override void OnInitialized()
+    {
+        if (ServiceHostId != -1)
+            ServiceHost = Context.ServiceHosts.Include(h => h.Host).Include(h => h.UpdateLogs).First(host => host.Id == ServiceHostId); //eww, but [Parameter] doesn't like cyclic references
+        if (LogId > 0)
+        {
+            Log = Context.UpdateLogs.First(log => log.Id == LogId).Log;
+            updateService.OnUpdateLog += OnUpdate;
+        }
+        base.OnInitialized();
+    }
+
+
+    public void Dispose()
+    {
+        if (LogId > 0)
+        {
+            updateService.OnUpdateLog -= OnUpdate;
+        }
+    }
+
+
+    public async void StartUpdate()
+    {
+        var update = new UpdateLog()
+        {
+            DateTime = DateTimeOffset.Now,
+            ServiceHostId = ServiceHostId,
+            OriginalVersion = versionService.GetValueOrDefault(ServiceHostId, string.Empty)
+        };
+        Context.UpdateLogs.Add(update);
+        await Context.SaveChangesAsync();
+        await ClientService.Clients.User(ServiceHost.Host.Name).SendAsync("StartUpdate", ServiceHostId, update.Id);
+        NavigationManager.NavigateTo("/ServiceHost/" + ServiceHostId + "/Update/" + update.Id);
+    }
+
+    public async Task OnUpdate(int logId, string output)
+    {
+        if(logId == LogId)
+        {
+            ServiceHost = Context.ServiceHosts.Include(h => h.Host).Include(h => h.UpdateLogs).First(host => host.Id == ServiceHostId); //eww, but [Parameter] doesn't like cyclic references
+            Log = output;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+
+}

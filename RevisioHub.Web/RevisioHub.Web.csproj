@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AspNetCore.SassCompiler" Version="1.77.5" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.3" />
@@ -18,6 +19,14 @@
 
   <ItemGroup>
     <ProjectReference Include="..\RevisioHub.Common\RevisioHub.Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="wwwroot\circlegauge.scss" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Styles\circlegauge.scss" />
   </ItemGroup>
 
 </Project>

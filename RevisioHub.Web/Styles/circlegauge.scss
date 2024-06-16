@@ -1,0 +1,185 @@
+﻿@import url(https://fonts.googleapis.com/css?family=Lato:700);
+
+// -- vars
+$bg-color: #34495e;
+$default-size: 1em;
+$label-font-size: calc($default-size / 4);
+$label-font-size-redo: calc($default-size * 4);
+$barsize: 5;
+
+// -- mixins
+@mixin size($width, $height) {
+    height: $height;
+    width: $width;
+}
+
+@mixin draw-progress($progress, $color) {
+    .pie {
+        .half-circle
+
+{
+    border-color: $color;
+}
+
+.left-side {
+    transform: rotate($progress * 3.6deg);
+}
+
+@if $progress <= 50 {
+    .right-side {
+        display: none;
+    }
+}
+
+@else {
+    clip: rect(auto, auto, auto, auto);
+
+    .right-side {
+        transform: rotate(180deg);
+    }
+}
+
+}
+}
+
+
+.pie-wrapper {
+    @include size($default-size, $default-size);
+    position: relative;
+
+    .pie {
+        @include size(100%, 100%);
+        clip: rect(0, $default-size, $default-size, calc($default-size / 2));
+        left: 0;
+        position: absolute;
+        top: 0;
+
+        .half-circle {
+            @include size(100%, 100%);
+            border: calc($default-size / $barsize) solid #3498db;
+            border-radius: 50%;
+            clip: rect(0, calc($default-size / 2), $default-size, 0);
+            left: 0;
+            position: absolute;
+            top: 0;
+        }
+    }
+
+    .label {
+        border-radius: 50%;
+        bottom: calc($label-font-size-redo / 10);
+        color: #ffffff;
+        cursor: default;
+        display: block;
+        font-size: $label-font-size;
+        left: calc($label-font-size-redo / $barsize);
+        line-height: calc($label-font-size-redo * .70);
+        position: absolute;
+        right: calc($label-font-size-redo / 10);
+        text-align: center;
+        top: calc($label-font-size-redo / 10);
+
+        .smaller {
+            color: #bdc3c7;
+            font-size: .45em;
+            vertical-align: super;
+        }
+    }
+
+    .shadow {
+        @include size(100%, 100%);
+        border: calc($default-size / $barsize) solid #2B3035;
+        border-radius: 50%;
+    }
+
+    &.style-2 {
+        .label {
+            .smaller {
+            }
+        }
+    }
+
+    &.progress-0 {
+        @include draw-progress(0, #198754);
+    }
+
+    &.progress-5 {
+        @include draw-progress(5, #198754);
+    }
+
+    &.progress-10 {
+        @include draw-progress(10, #198754);
+    }
+
+    &.progress-15 {
+        @include draw-progress(15, #198754);
+    }
+
+    &.progress-20 {
+        @include draw-progress(20, #198754);
+    }
+
+    &.progress-25 {
+        @include draw-progress(25, #198754);
+    }
+
+    &.progress-30 {
+        @include draw-progress(30, #198754);
+    }
+
+    &.progress-35 {
+        @include draw-progress(35, #198754);
+    }
+
+    &.progress-40 {
+        @include draw-progress(40, #198754);
+    }
+
+    &.progress-45 {
+        @include draw-progress(45, #198754);
+    }
+
+    &.progress-50 {
+        @include draw-progress(50, #198754);
+    }
+
+    &.progress-55 {
+        @include draw-progress(55, #198754);
+    }
+
+    &.progress-60 {
+        @include draw-progress(60, #198754);
+    }
+
+    &.progress-65 {
+        @include draw-progress(65, #198754);
+    }
+
+    &.progress-70 {
+        @include draw-progress(70, #198754);
+    }
+
+    &.progress-75 {
+        @include draw-progress(75, #198754);
+    }
+
+    &.progress-80 {
+        @include draw-progress(80, #198754);
+    }
+
+    &.progress-85 {
+        @include draw-progress(85, #198754);
+    }
+
+    &.progress-90 {
+        @include draw-progress(90, #198754);
+    }
+
+    &.progress-95 {
+        @include draw-progress(95, #198754);
+    }
+
+    &.progress-100 {
+        @include draw-progress(100, #198754);
+    }
+}

@@ -27,7 +27,16 @@
             <li class="list-group-item @bgColor p-1">@status.Status</li>
             <li class="list-group-item p-1">
                 <div class="row">
-                    <div class="col"><span class="bi bi-cpu m-1"></span>@Math.Round(status.CpuPerc)%</div>
+                    <div class="col">
+                        <div class="pie-wrapper progress-@(Math.Round((status.CpuPerc) / 5)*5)" style="font-size: 3em;">
+                            <div class="pie">
+                                <div class="left-side half-circle"></div>
+                                <div class="right-side half-circle"></div>
+                            </div>
+                            <div class="shadow"></div>
+                            <span class="label" style="line-height: 1em"><span class="bi bi-cpu m-1"></span><br />@Math.Round(status.CpuPerc)<span class="smaller">%</span></span>
+                        </div>
+                    </div>
                     <div class="col"><span class="bi bi-memory m-1"></span>@status.Mem</div>
                     <div class="col-6"><span class="bi bi-hdd-network m-1"></span>@status.NetIO</div>
                 </div>
@@ -41,7 +50,7 @@
             <a href="/ServiceHost/@ServiceHost.Id" class="btn btn-sm btn-secondary">Edit</a>
             <button @onclick="Start" class="btn btn-sm btn-success">Start</button>
             <button @onclick="Stop" class="btn btn-sm btn-danger">Stop</button>
-            <button class="btn btn-sm btn-info">Update</button>
+            <a class="btn btn-sm btn-info" href="/ServiceHost/@ServiceHost.Id/Update">Update</a>
             <a class="btn btn-sm btn-primary" href="/ServiceHost/@ServiceHost.Id/Log">Log</a>
         </div>
     </div>
@@ -92,7 +101,7 @@
         await RunScript(stopScript);
     }
 
-
+    //TODO: move somewhere central
     public async Task RunScript(ServiceScript script)
     {
         Console.WriteLine("Running " + script.Script + " in " + ServiceHost.WorkingDirectory);

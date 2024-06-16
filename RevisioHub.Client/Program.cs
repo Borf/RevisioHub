@@ -62,6 +62,7 @@ public class Program
         connection.On<RunConfig>("RunScript", OnRunScript);
         connection.On("Restart", OnRestart);
         connection.On<int>("Log", OnLog);
+        connection.On<int, int>("StartUpdate", StartUpdate);
 
 
         Console.WriteLine("Connecting to server");
@@ -76,12 +77,26 @@ public class Program
 
     private static async Task OnLog(int serviceHostId)
     {
-
         var service = HostInfo.ServiceHosts.First(h => h.Id == serviceHostId);
         var logScript = service.Service.ServiceScripts.FirstOrDefault(sc => sc.ScriptType == ScriptType.Logs && sc.HostType == HostInfo.HostType) ?? service.Service.ServiceScripts.FirstOrDefault(sc => sc.ScriptType == ScriptType.Logs && sc.HostType == HostType.Generic);
         string log = await RunScript(service, logScript!);
         await connection.SendAsync("OnLog", serviceHostId, log);
     }
+
+
+    private static async Task StartUpdate(int serviceHostId, int LogId)
+    {
+        Console.WriteLine("Updating service...");
+        var service = HostInfo.ServiceHosts.First(h => h.Id == serviceHostId);
+        var updateScript = service.Service.ServiceScripts.FirstOrDefault(sc => sc.ScriptType == ScriptType.Update && sc.HostType == HostInfo.HostType) ?? service.Service.ServiceScripts.FirstOrDefault(sc => sc.ScriptType == ScriptType.Update && sc.HostType == HostType.Generic);
+        await RunScript(service, updateScript!, connection, LogId, "UpdateUpdate");
+        Console.WriteLine("Done Updating service...");
+        var versionScript = service.Service.ServiceScripts.FirstOrDefault(sc => sc.ScriptType == ScriptType.Version && sc.HostType == HostInfo.HostType) ?? service.Service.ServiceScripts.FirstOrDefault(sc => sc.ScriptType == ScriptType.Version && sc.HostType == HostType.Generic);
+        var version = await RunScript(service, versionScript!);
+        await connection.SendAsync("UpdateVersion", LogId, version);
+
+    }
+
 
     private static void OnRestart()
     {
@@ -217,4 +232,56 @@ public class Program
         return output;
     }
 
+
+    private static async Task RunScript(ServiceHost service, ServiceScript script, HubConnection connection, int id, string callback)
+    {
+        string scriptFile = Path.Combine(service.WorkingDirectory, script.ScriptType.ToString());
+        string command = script.Script;
+        if (HostInfo.HostType == HostType.WindowsService || HostInfo.HostType == HostType.WindowsConsole)
+        {
+            scriptFile = Path.Combine(service.WorkingDirectory, script.ScriptType.ToString() + ".bat");
+            command = "@echo off\n" + command;
+        }
+
+        await File.WriteAllTextAsync(scriptFile, command);
+        if (HostInfo.HostType == HostType.Linux || HostInfo.HostType == HostType.DockerLinux)
+            await Process.Start("chmod", "777 " + scriptFile).WaitForExitAsync();
+
+        var psi = new ProcessStartInfo
+        {
+            FileName = scriptFile,
+            WorkingDirectory = service.WorkingDirectory,
+            RedirectStandardOutput = true,
+            CreateNoWindow = true,
+            UseShellExecute = false,
+        };
+        foreach (var var in service.EnvironmentVariables)
+            psi.Environment[var.Variable] = var.Value;
+
+        if (HostInfo.HostType == HostType.Linux || HostInfo.HostType == HostType.DockerLinux)
+        {
+            psi.FileName = "/bin/bash";
+            psi.Arguments = scriptFile;
+        }
+
+
+
+        var process = Process.Start(psi);
+        if (process == null)
+            return;
+        string output = "";
+        while (!process.StandardOutput.EndOfStream)
+        {
+            while (process.StandardOutput.Peek() != -1)
+            {
+                output += process.StandardOutput.ReadLine() + "\n";
+            }
+            await connection.SendAsync(callback, id, output);
+        }
+        if (output.EndsWith("\n"))
+            output = output.Substring(0, output.Length - 1);
+        await connection.SendAsync(callback, id, output);
+        await process!.WaitForExitAsync();
+        return;
+    }
 }

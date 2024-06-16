@@ -1,0 +1,270 @@
+@import url(https://fonts.googleapis.com/css?family=Lato:700);
+.pie-wrapper {
+  height: 1em;
+  width: 1em;
+  position: relative;
+}
+.pie-wrapper .pie {
+  height: 100%;
+  width: 100%;
+  clip: rect(0, 1em, 1em, 0.5em);
+  left: 0;
+  position: absolute;
+  top: 0;
+}
+.pie-wrapper .pie .half-circle {
+  height: 100%;
+  width: 100%;
+  border: 0.2em solid #3498db;
+  border-radius: 50%;
+  clip: rect(0, 0.5em, 1em, 0);
+  left: 0;
+  position: absolute;
+  top: 0;
+}
+.pie-wrapper .label {
+  border-radius: 50%;
+  bottom: 0.4em;
+  color: #ffffff;
+  cursor: default;
+  display: block;
+  font-size: 0.25em;
+  left: 0.8em;
+  line-height: 2.8em;
+  position: absolute;
+  right: 0.4em;
+  text-align: center;
+  top: 0.4em;
+}
+.pie-wrapper .label .smaller {
+  color: #bdc3c7;
+  font-size: 0.45em;
+  vertical-align: super;
+}
+.pie-wrapper .shadow {
+  height: 100%;
+  width: 100%;
+  border: 0.2em solid #2B3035;
+  border-radius: 50%;
+}
+.pie-wrapper.progress-0 .pie .half-circle {
+  border-color: #198754;
+}
+.pie-wrapper.progress-0 .pie .left-side {
+  transform: rotate(0deg);
+}
+.pie-wrapper.progress-0 .pie .right-side {
+  display: none;
+}
+.pie-wrapper.progress-5 .pie .half-circle {
+  border-color: #198754;
+}
+.pie-wrapper.progress-5 .pie .left-side {
+  transform: rotate(18deg);
+}
+.pie-wrapper.progress-5 .pie .right-side {
+  display: none;
+}
+.pie-wrapper.progress-10 .pie .half-circle {
+  border-color: #198754;
+}
+.pie-wrapper.progress-10 .pie .left-side {
+  transform: rotate(36deg);
+}
+.pie-wrapper.progress-10 .pie .right-side {
+  display: none;
+}
+.pie-wrapper.progress-15 .pie .half-circle {
+  border-color: #198754;
+}
+.pie-wrapper.progress-15 .pie .left-side {
+  transform: rotate(54deg);
+}
+.pie-wrapper.progress-15 .pie .right-side {
+  display: none;
+}
+.pie-wrapper.progress-20 .pie .half-circle {
+  border-color: #198754;
+}
+.pie-wrapper.progress-20 .pie .left-side {
+  transform: rotate(72deg);
+}
+.pie-wrapper.progress-20 .pie .right-side {
+  display: none;
+}
+.pie-wrapper.progress-25 .pie .half-circle {
+  border-color: #198754;
+}
+.pie-wrapper.progress-25 .pie .left-side {
+  transform: rotate(90deg);
+}
+.pie-wrapper.progress-25 .pie .right-side {
+  display: none;
+}
+.pie-wrapper.progress-30 .pie .half-circle {
+  border-color: #198754;
+}
+.pie-wrapper.progress-30 .pie .left-side {
+  transform: rotate(108deg);
+}
+.pie-wrapper.progress-30 .pie .right-side {
+  display: none;
+}
+.pie-wrapper.progress-35 .pie .half-circle {
+  border-color: #198754;
+}
+.pie-wrapper.progress-35 .pie .left-side {
+  transform: rotate(126deg);
+}
+.pie-wrapper.progress-35 .pie .right-side {
+  display: none;
+}
+.pie-wrapper.progress-40 .pie .half-circle {
+  border-color: #198754;
+}
+.pie-wrapper.progress-40 .pie .left-side {
+  transform: rotate(144deg);
+}
+.pie-wrapper.progress-40 .pie .right-side {
+  display: none;
+}
+.pie-wrapper.progress-45 .pie .half-circle {
+  border-color: #198754;
+}
+.pie-wrapper.progress-45 .pie .left-side {
+  transform: rotate(162deg);
+}
+.pie-wrapper.progress-45 .pie .right-side {
+  display: none;
+}
+.pie-wrapper.progress-50 .pie .half-circle {
+  border-color: #198754;
+}
+.pie-wrapper.progress-50 .pie .left-side {
+  transform: rotate(180deg);
+}
+.pie-wrapper.progress-50 .pie .right-side {
+  display: none;
+}
+.pie-wrapper.progress-55 .pie {
+  clip: rect(auto, auto, auto, auto);
+}
+.pie-wrapper.progress-55 .pie .half-circle {
+  border-color: #198754;
+}
+.pie-wrapper.progress-55 .pie .left-side {
+  transform: rotate(198deg);
+}
+.pie-wrapper.progress-55 .pie .right-side {
+  transform: rotate(180deg);
+}
+.pie-wrapper.progress-60 .pie {
+  clip: rect(auto, auto, auto, auto);
+}
+.pie-wrapper.progress-60 .pie .half-circle {
+  border-color: #198754;
+}
+.pie-wrapper.progress-60 .pie .left-side {
+  transform: rotate(216deg);
+}
+.pie-wrapper.progress-60 .pie .right-side {
+  transform: rotate(180deg);
+}
+.pie-wrapper.progress-65 .pie {
+  clip: rect(auto, auto, auto, auto);
+}
+.pie-wrapper.progress-65 .pie .half-circle {
+  border-color: #198754;
+}
+.pie-wrapper.progress-65 .pie .left-side {
+  transform: rotate(234deg);
+}
+.pie-wrapper.progress-65 .pie .right-side {
+  transform: rotate(180deg);
+}
+.pie-wrapper.progress-70 .pie {
+  clip: rect(auto, auto, auto, auto);
+}
+.pie-wrapper.progress-70 .pie .half-circle {
+  border-color: #198754;
+}
+.pie-wrapper.progress-70 .pie .left-side {
+  transform: rotate(252deg);
+}
+.pie-wrapper.progress-70 .pie .right-side {
+  transform: rotate(180deg);
+}
+.pie-wrapper.progress-75 .pie {
+  clip: rect(auto, auto, auto, auto);
+}
+.pie-wrapper.progress-75 .pie .half-circle {
+  border-color: #198754;
+}
+.pie-wrapper.progress-75 .pie .left-side {
+  transform: rotate(270deg);
+}
+.pie-wrapper.progress-75 .pie .right-side {
+  transform: rotate(180deg);
+}
+.pie-wrapper.progress-80 .pie {
+  clip: rect(auto, auto, auto, auto);
+}
+.pie-wrapper.progress-80 .pie .half-circle {
+  border-color: #198754;
+}
+.pie-wrapper.progress-80 .pie .left-side {
+  transform: rotate(288deg);
+}
+.pie-wrapper.progress-80 .pie .right-side {
+  transform: rotate(180deg);
+}
+.pie-wrapper.progress-85 .pie {
+  clip: rect(auto, auto, auto, auto);
+}
+.pie-wrapper.progress-85 .pie .half-circle {
+  border-color: #198754;
+}
+.pie-wrapper.progress-85 .pie .left-side {
+  transform: rotate(306deg);
+}
+.pie-wrapper.progress-85 .pie .right-side {
+  transform: rotate(180deg);
+}
+.pie-wrapper.progress-90 .pie {
+  clip: rect(auto, auto, auto, auto);
+}
+.pie-wrapper.progress-90 .pie .half-circle {
+  border-color: #198754;
+}
+.pie-wrapper.progress-90 .pie .left-side {
+  transform: rotate(324deg);
+}
+.pie-wrapper.progress-90 .pie .right-side {
+  transform: rotate(180deg);
+}
+.pie-wrapper.progress-95 .pie {
+  clip: rect(auto, auto, auto, auto);
+}
+.pie-wrapper.progress-95 .pie .half-circle {
+  border-color: #198754;
+}
+.pie-wrapper.progress-95 .pie .left-side {
+  transform: rotate(342deg);
+}
+.pie-wrapper.progress-95 .pie .right-side {
+  transform: rotate(180deg);
+}
+.pie-wrapper.progress-100 .pie {
+  clip: rect(auto, auto, auto, auto);
+}
+.pie-wrapper.progress-100 .pie .half-circle {
+  border-color: #198754;
+}
+.pie-wrapper.progress-100 .pie .left-side {
+  transform: rotate(360deg);
+}
+.pie-wrapper.progress-100 .pie .right-side {
+  transform: rotate(180deg);
+}
+
+/*# sourceMappingURL=circlegauge.css.map */

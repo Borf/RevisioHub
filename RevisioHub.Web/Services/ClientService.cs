@@ -24,16 +24,18 @@ public class ClientService : Hub
     private IServiceProvider serviceProvider;
     private ServiceStatusService serviceStatus;
     private ServiceVersionService serviceVersion;
+    private ServiceUpdateLogService serviceUpdateLog;
     private ServiceLogService serviceLog;
 
     private Dictionary<string, List<string>> Connections = new();
 
-    public ClientService(IServiceProvider serviceProvider, ServiceStatusService serviceStatus, ServiceVersionService serviceVersion, ServiceLogService serviceLog)
+    public ClientService(IServiceProvider serviceProvider, ServiceStatusService serviceStatus, ServiceVersionService serviceVersion, ServiceLogService serviceLog, ServiceUpdateLogService serviceUpdateLog)
     {
         this.serviceProvider = serviceProvider;
         this.serviceStatus = serviceStatus;
         this.serviceVersion = serviceVersion;
         this.serviceLog = serviceLog;
+        this.serviceUpdateLog = serviceUpdateLog;
     }
 
     public override async Task OnConnectedAsync()
@@ -86,6 +88,27 @@ public class ClientService : Hub
     {
         serviceLog[serviceHostId] = data;
     }
+
+    public async void UpdateUpdate(int logId, string output)
+    {
+        using var scope = serviceProvider.CreateScope();
+        using var context = scope.ServiceProvider.GetRequiredService<Context>();
+        var log = context.UpdateLogs.Find(logId);
+        log!.Log = output;
+        await context.SaveChangesAsync();
+        await serviceUpdateLog.UpdateLog(logId, output);
+    }
+
+    public async void UpdateVersion(int logId, string newVersion)
+    {
+        using var scope = serviceProvider.CreateScope();
+        using var context = scope.ServiceProvider.GetRequiredService<Context>();
+        var log = context.UpdateLogs.Find(logId);
+        log.NewVersion = newVersion;
+        await context.SaveChangesAsync();
+        await serviceUpdateLog.UpdateLog(logId, log.Log);
+    }
+
 
     public List<string> GetConnectionIds(string user)
     {

@@ -45,7 +45,11 @@ builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuth
 builder.Services.AddSingleton<ServiceStatusService>();
 builder.Services.AddSingleton<ServiceLogService>();
 builder.Services.AddSingleton<ServiceVersionService>();
+builder.Services.AddSingleton<ServiceUpdateLogService>();
 builder.Services.AddHttpContextAccessor();
+#if DEBUG
+builder.Services.AddSassCompiler();
+#endif
 
 builder.Services.AddAuthentication(options =>
     {

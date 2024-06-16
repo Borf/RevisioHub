@@ -16,4 +16,7 @@ public class UpdateLog
     public ServiceHost ServiceHost { get; set; } = null!;
     public int ServiceHostId { get; set; }
     public string Log { get; set; } = string.Empty;
+    public string OriginalVersion { get; set; } = string.Empty;
+    public string NewVersion { get; set; } = string.Empty;
+
 }
