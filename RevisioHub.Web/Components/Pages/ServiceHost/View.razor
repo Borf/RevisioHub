@@ -27,10 +27,20 @@ Working Directory
 </EditForm>
 
 <h5>Environment variables</h5>
-<ul class="list-group list-group">
-    @foreach(var variable in ServiceHost.EnvironmentVariables)
+<ul class="list-group">
+    @foreach (var variable in ServiceHost.EnvironmentVariables)
     {
-        <li>@variable.Variable -> @variable.Value</li>
+        var _variable = variable;
+        <li class="list-group-item">
+            <EditForm Model="_variable" method="post" OnValidSubmit="UpdateVariable">
+                <div class="row">
+                    <div class="col-5"><input class="form-control" @bind="_variable.Variable" /></div>
+                    <div class="col-5"><input class="form-control" @bind="_variable.Value" /></div>
+                    <input class="col-1 btn btn-primary" type="submit" value="Update" />
+                    <input class="col-1 btn btn-danger" type="button" value="Delete" @onclick="() => DeleteVariable(_variable)" />
+                </div>
+            </EditForm>
+        </li>
     }
 </ul>
 
@@ -55,6 +65,20 @@ Working Directory
     public async Task UpdateServiceHost()
     {
         Context.ServiceHosts.Update(ServiceHost);
+        await Context.SaveChangesAsync();
+    }
+
+
+    public async Task UpdateVariable(EditContext editContext)
+    {
+        var model = editContext.Model as EnvironmentVariable;
+        Context.EnvironmentVariables.Update(model!);
+        await Context.SaveChangesAsync();
+    }
+
+    public async Task DeleteVariable(EnvironmentVariable variable)
+    {
+        Context.EnvironmentVariables.Remove(variable);
         await Context.SaveChangesAsync();
     }
 

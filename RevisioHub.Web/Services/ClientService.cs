@@ -105,8 +105,8 @@ public class ClientService : Hub
     {
         using var scope = serviceProvider.CreateScope();
         using var context = scope.ServiceProvider.GetRequiredService<Context>();
-        var log = context.UpdateLogs.Find(logId);
-        log!.Log = output;
+        var log = context.UpdateLogs.Find(logId)!;
+        log.Log = output;
         await context.SaveChangesAsync();
         await serviceUpdateLog.UpdateLog(logId, output);
     }
@@ -115,7 +115,7 @@ public class ClientService : Hub
     {
         using var scope = serviceProvider.CreateScope();
         using var context = scope.ServiceProvider.GetRequiredService<Context>();
-        var log = context.UpdateLogs.Find(logId);
+        var log = context.UpdateLogs.Find(logId)!;
         log.NewVersion = newVersion;
         await context.SaveChangesAsync();
         serviceVersion[log.ServiceHostId] = newVersion;

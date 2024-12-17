@@ -158,3 +158,17 @@ app.MapRazorComponents<App>()
 app.MapAdditionalIdentityEndpoints();
 
 app.Run();
+
+
+
+//var lines = File.ReadAllLines(openSesame.FileName);
+//foreach(var line in lines)
+//{
+//    var splitted = line.Split(",");
+//    var carBrand = splitted[0];
+//    var carModel = splitted[1];
+//    var carPrice = Convert.ToInt32(splitted[3]); //what happened to 2?
+//    var car = new Car(carBrand, carModel, carPrice);
+//    if (!cars.Contains(car)) //this won't work
+//        cars.Add(car);
+//}

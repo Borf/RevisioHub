@@ -11,4 +11,6 @@ public class Context(DbContextOptions<Context> options) : DbContext(options)
     public DbSet<ServiceScript> ServiceScripts { get; set; }
     public DbSet<EnvironmentVariable> EnvironmentVariables { get; set; }
     public DbSet<UpdateLog> UpdateLogs { get; set; }
+    public DbSet<ServiceEnvironmentVariable> ServiceEnvironmentVariables { get; set; }
+    public DbSet<InstallationFile> InstallationFiles { get; set; }
 }

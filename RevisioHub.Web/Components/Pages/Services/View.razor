@@ -14,10 +14,10 @@
 <div class="container border m-0 p-3 rounded rounded-3">
     <h4>Hosts</h4>
     <ul class="d-flex flex-wrap p-0">
-    @foreach (var serviceHost in Service.ServiceHosts)
-    {
-        <ServiceHostLi ServiceHost="serviceHost"/>
-    }
+        @foreach (var serviceHost in Service.ServiceHosts)
+        {
+            <ServiceHostLi ServiceHost="serviceHost"/>
+        }
     </ul>
     <h3>Add Host to service</h3>
     <EditForm Model="ServiceHost" method="post" OnValidSubmit="AddServiceHost" FormName="ServiceHost">
@@ -40,20 +40,121 @@
 
 
 <div class="container border m-0 p-3 rounded rounded-3 mt-5">
+    <h4>Installation Files</h4>
+    <ul class="nav nav-tabs">
+        @foreach(var file in Context.InstallationFiles.Where(file => file.ServiceId == Service.Id))
+        {
+            <li class="nav-item" @onclick="() => CurrentInstallationFile = file">
+                <span class="nav-link @(CurrentInstallationFile == file ? "active" : "")">Active</span>
+            </li>
+        }
+        <li class="nav-item" @onclick="() => CurrentInstallationFile = null">
+            <span class="nav-link @(CurrentInstallationFile == null ? "active" : "")">New</span>
+        </li>
+    </ul>
+    <div>
+        @if (CurrentInstallationFile == null)
+        {
+            <form>
+                <div class="row">
+                    <label class="col-sm-2 col-form-label">Type</label>
+                    <div class="col-sm-10">
+                        <select class="form-control form-select" @bind="NewInstallationFile.FileType">
+                            <option value="@FileType.Text">Text</option>
+                            <option value="@FileType.Binary">Binary</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <label class="col-sm-2 col-form-label">Filename</label>
+                    <div class="col-sm-10">
+                        <input class="form-control" @bind="NewInstallationFile.FileName" />
+                    </div>
+                </div>
+                @if(NewInstallationFile.FileType == FileType.Text)
+                {
+                    <textarea id="InstallationFileEditor" @bind="NewInstallationFile.StrData" class="form-control" style="height: 200px;font-family: 'Courier New'"></textarea>
+                }
+
+                <input class="form-control btn btn-primary" type="submit" value="Add new script" @onclick="AddInstallationScript"/>
+
+            </form>
+        }
+        else
+        {
+            <form>
+                <div class="row">
+                    <label class="col-sm-2 col-form-label">Type</label>
+                    <div class="col-sm-10">
+                        <select class="form-control form-select" @bind="CurrentInstallationFile.FileType">
+                            <option value="@FileType.Text">Text</option>
+                            <option value="@FileType.Binary">Binary</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <label class="col-sm-2 col-form-label">Filename</label>
+                    <div class="col-sm-10">
+                        <input class="form-control" @bind="CurrentInstallationFile.FileName" />
+                    </div>
+                </div>
+                @if (CurrentInstallationFile.FileType == FileType.Text)
+                {
+                    <textarea id="InstallationFileEditor" @bind="CurrentInstallationFile.StrData" class="form-control" style="height: 200px; font-family: 'Courier New'"></textarea>
+                }
+
+                <input class="form-control btn btn-primary" type="submit" value="Update" @onclick="UpdateInstallScript" />
+                <input class="form-control btn btn-danger" type="button" value="Delete" @onclick="DeleteInstallScript" />
+
+            </form>
+        }
+
+    </div>
+</div>
+
+
+<div class="container border m-0 p-3 rounded rounded-3 mt-5">
+    <h4>Environment Variables</h4>
+    <ul class="list-group">
+        @foreach(var variable in Context.ServiceEnvironmentVariables.Where(sev => sev.ServiceId == Service.Id))
+        {
+            var _variable = variable;
+            <li class="list-group-item">
+                <EditForm Model="_variable" method="post" OnValidSubmit="UpdateVariable">
+                    <div class="row">
+                        <div class="col-5"><input class="form-control" @bind="_variable.Variable" /></div>
+                        <div class="col-5"><input class="form-control" @bind="_variable.Value" /></div>
+                        <input class="col-1 btn btn-primary" type="submit" value="Update"/>
+                        <input class="col-1 btn btn-danger" type="button" value="Delete" @onclick="() => DeleteVariable(_variable)"/>
+                    </div>
+                </EditForm>
+            </li>
+        }
+    </ul>
+    <EditForm Model="NewEnvironmentVariable" method="post" OnValidSubmit="AddVariable">
+        <div class="input-group">
+            <input class="form-control" @bind="NewEnvironmentVariable.Variable" placeholder="Variable Name" />
+            <input class="form-control" @bind="NewEnvironmentVariable.Value" placeholder="Variable Value" />
+            <button type="submit" class="btn btn-primary">Add Variable</button>
+        </div>
+    </EditForm>
+</div>
+
+<div class="container border m-0 p-3 rounded rounded-3 mt-5">
     <h4>Scripts</h4>
     <ul class="list-group">
-    @foreach(var hostScript in Service.ServiceScripts.GroupBy(s => s.HostType).ToDictionary(s => s.First().HostType))
-    {
-        <li class="list-group-item">
-            <span>@hostScript.Key</span>
-            <ul class="list-group-horizontal d-flex flex-wrap">
-            @foreach(var script in hostScript.Value)
-            {
-                <li class="list-group-item border-0 p-1"><a href="/scripts/@script.Id" class="btn btn-primary">@script.ScriptType</a></li>
-            }
-            </ul>
-        </li>
-    }
+        @foreach(var hostScript in Service.ServiceScripts.GroupBy(s => s.HostType).ToDictionary(s => s.First().HostType))
+        {
+            <li class="list-group-item">
+                <span>@hostScript.Key</span>
+                <ul class="list-group-horizontal d-flex flex-wrap">
+                    @foreach(var script in hostScript.Value)
+                    {
+                        <li class="list-group-item border-0 p-1"><a href="/scripts/@script.Id" class="btn btn-primary">@script.ScriptType</a></li>
+                    }
+                </ul>
+            </li>
+        }
     </ul>
 
     <h3>Add Service Script</h3>
@@ -92,10 +193,22 @@
 
     public Service Service => Context.Services.Include(s => s.ServiceHosts).ThenInclude(sh => sh.Host).Include(s => s.ServiceScripts).First(s => s.Id == ServiceId);
 
+
+    public InstallationFile? CurrentInstallationFile { get; set; }
+    public InstallationFile NewInstallationFile { get; set; } = new();
+
     [SupplyParameterFromForm(FormName = "AddScript")]
     private ScriptModel Script { get; set; } = new();
     [SupplyParameterFromForm(FormName = "ServiceHost")]
     private ServiceHostModel ServiceHost { get; set; } = new();
+    [SupplyParameterFromForm(FormName = "AddEnvironmentVariable")]
+    private EnvironmentVariableModel NewEnvironmentVariable { get; set; } = new();
+
+    protected override Task OnInitializedAsync()
+    {
+        CurrentInstallationFile = Context.InstallationFiles.FirstOrDefault(file => file.ServiceId == Service.Id);
+        return base.OnInitializedAsync();
+    }
 
     public async Task AddScript(EditContext editContext)
     {
@@ -129,6 +242,59 @@
         await ClientService.ClientConfigUpdated(Context.Hosts.Find(serviceHost.HostId)!.Name, Context);
     }
 
+    public async Task AddInstallationScript()
+    {
+        if (string.IsNullOrEmpty(NewInstallationFile.FileName))
+            return;
+
+        NewInstallationFile.ServiceId = Service.Id;
+        Context.InstallationFiles.Add(NewInstallationFile);
+        await Context.SaveChangesAsync();
+        NewInstallationFile = new();
+        CurrentInstallationFile = null;
+    }
+
+    public async Task UpdateInstallScript()
+    {
+        Context.InstallationFiles.Update(CurrentInstallationFile!);
+        await Context.SaveChangesAsync();
+    }
+
+    public async Task DeleteInstallScript()
+    {
+        Context.InstallationFiles.Update(CurrentInstallationFile!);
+        await Context.SaveChangesAsync();
+        CurrentInstallationFile = Context.InstallationFiles.FirstOrDefault(file => file.ServiceId == Service.Id);
+    }
+
+
+
+    public async Task AddVariable(EditContext editContext)
+    {
+        Context.ServiceEnvironmentVariables.Add(new ServiceEnvironmentVariable()
+        {
+            ServiceId = Service.Id,
+            Variable = NewEnvironmentVariable.Variable,
+            Value = NewEnvironmentVariable.Value
+        });
+        await Context.SaveChangesAsync();
+        NewEnvironmentVariable = new();
+    }
+
+    public async Task UpdateVariable(EditContext editContext)
+    {
+        var model = editContext.Model as ServiceEnvironmentVariable;
+        Context.ServiceEnvironmentVariables.Update(model!);
+        await Context.SaveChangesAsync();
+    }
+
+    public async Task DeleteVariable(ServiceEnvironmentVariable variable)
+    {
+        Context.ServiceEnvironmentVariables.Remove(variable);
+        await Context.SaveChangesAsync();
+    }
+
+
     private sealed class ScriptModel
     {
         [Required]
@@ -141,6 +307,7 @@
 
         [Display(Name = "Script")]
         public string Script { get; set; } = "";
+        
     }
 
     private sealed class ServiceHostModel
@@ -148,6 +315,13 @@
         [Required]
         public int HostId { get; set; } = 0;
         public string WorkDirectory { get; set; } = string.Empty;
+    }
+
+    private sealed class EnvironmentVariableModel
+    {
+        [Required]
+        public string Variable { get; set; } = string.Empty;
+        public string Value { get; set; } = string.Empty;
     }
 
 }
